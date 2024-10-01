@@ -19,22 +19,21 @@ from trl import SFTConfig
 from trl import SFTTrainer
 
 from model.modeling_llama import LlamaForCausalLM
-from utils import TrainCallback
+from utils import *
 
 
 def arg_parse():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--lora", action="store_true")
+    parser.add_argument("--use-lora", action="store_true")
     parser.add_argument(
-        "--model",
+        "--model-name-or-path",
         type=str,
         default="/root/poc/pretrained_models/Meta-Llama-3-70B-Instruct")
     parser.add_argument(
-        "--dataset",
+        "--dataset-name-or-path",
         type=str,
-        default=
-        "/root/poc/datasets/Bitext_Sample_Customer_Support_Training_Dataset_27K_responses-v11.csv"
-    )
+        default="bitext/Bitext-customer-support-llm-chatbot-training-dataset")
+    parser.add_argument("--block-size", type=int, default=32768)
     parser.add_argument("--train-batch-size", type=int, default=32)
     parser.add_argument("--eval-batch-size", type=int, default=32)
     parser.add_argument("--lr", type=float, default=5e-5)
@@ -65,30 +64,14 @@ def main(args):
         datasets.utils.logging.set_verbosity_error()
         transformers.utils.logging.set_verbosity_error()
 
-    # TODO load_model function
-    model = LlamaForCausalLM.from_pretrained(
-        args.model,
-        torch_dtype=torch.bfloat16,
-        trust_remote_code=True,
-        attn_implementation='flash_attention_2' if args.flash_attn else "eager",
-        use_cache=False,
-    )
+    model, tokenizer = load_model(args)
 
-    # TODO load_tokenizer function
-    tokenizer = AutoTokenizer.from_pretrained(
-        args.model,
-        trust_remote_code=True,
-        padding_side="right",
-    )
-
-    tokenizer.pad_token = tokenizer.eos_token
-    tokenizer.padding_side = 'right'
-    tokenizer.model_max_length = 1024
-    tokenizer.padding = "max_length"
-
-    dataset = load_dataset(args.dataset).with_format("torch")
-    dataset["train"] = load_dataset(args.dataset, split="train[5%:]")
-    dataset["validation"] = load_dataset(args.dataset, split="train[:5%]")
+    if args.dataset_name_or_path == "bitext/Bitext-customer-support-llm-chatbot-training-dataset":
+        dataset = load_dataset(args.dataset_name_or_path).with_format("torch")
+        dataset["train"] = load_dataset(args.dataset_name_or_path,
+                                        split="train[5%:]")
+        dataset["validation"] = load_dataset(args.dataset_name_or_path,
+                                             split="train[:5%]")
 
     def preprocess(prompt):
         chat = [
@@ -104,12 +87,12 @@ def main(args):
         chat = tokenizer.apply_chat_template(chat, tokenize=False)
         result = tokenizer(chat,
                            truncation=True,
-                           max_length=1024,
+                           max_length=args.block_size,
                            padding="max_length")
         result['labels'] = copy.deepcopy(result['input_ids'])
         return result
 
-    dataset = dataset.map(preprocess, num_proc=16)
+    dataset = dataset.map(preprocess, num_proc=1)
     dataset = dataset.remove_columns(
         ['flags', 'instruction', 'category', 'intent', 'response'])
 
@@ -135,18 +118,7 @@ def main(args):
         max_grad_norm=0,
     )
 
-    peft_config = LoraConfig(
-        r=64,
-        lora_alpha=16,
-        target_modules=["q_proj", "v_proj"],
-        lora_dropout=0.1,
-        bias="none",
-        task_type="CAUSAL_LM",
-    )
-
     warm_up_st = time.time()
-    if args.lora:
-        model = get_peft_model(model, peft_config)
 
     total_train_steps = (len(dataset["train"]) //
                          (world_size * args.train_batch_size)) * args.num_epochs
