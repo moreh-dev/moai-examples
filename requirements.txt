@@ -1,0 +1,11 @@
+transformers==4.42.3
+setuptools==69.5.1
+hydra-core
+peft==0.6.1
+Jinja2
+datasets
+loguru
+sentencepiece
+openai
+tenacity
+trl
