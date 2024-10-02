@@ -67,11 +67,13 @@ def main(args):
     model, tokenizer = load_model(args)
 
     if args.dataset_name_or_path == "bitext/Bitext-customer-support-llm-chatbot-training-dataset":
-        dataset = load_dataset(args.dataset_name_or_path).with_format("torch")
+        dataset = {}
         dataset["train"] = load_dataset(args.dataset_name_or_path,
-                                        split="train[5%:]")
+                                        split="train[95%:]")
         dataset["validation"] = load_dataset(args.dataset_name_or_path,
                                              split="train[:5%]")
+    else:
+        dataset = load_dataset(args.dataset_name_or_path)
 
     def preprocess(prompt):
         chat = [
@@ -92,9 +94,14 @@ def main(args):
         result['labels'] = copy.deepcopy(result['input_ids'])
         return result
 
-    dataset = dataset.map(preprocess, num_proc=1)
-    dataset = dataset.remove_columns(
-        ['flags', 'instruction', 'category', 'intent', 'response'])
+    if args.dataset_name_or_path == "bitext/Bitext-customer-support-llm-chatbot-training-dataset":
+        dataset['train'] = dataset['train'].map(preprocess,
+                                                num_proc=1,
+                                                load_from_cache_file=True)
+        dataset['validation'] = dataset['validation'].map(
+            preprocess, num_proc=1, load_from_cache_file=True)
+    else:
+        dataset = dataset.map(preprocess, num_proc=1, load_from_cache_file=True)
 
     # SFTConfig
     trainer_config = SFTConfig(
@@ -124,6 +131,7 @@ def main(args):
                          (world_size * args.train_batch_size)) * args.num_epochs
 
     trainer = SFTTrainer(model,
+                         tokenizer=tokenizer,
                          args=trainer_config,
                          train_dataset=dataset['train'],
                          eval_dataset=dataset['validation'],
