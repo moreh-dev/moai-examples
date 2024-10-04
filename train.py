@@ -103,6 +103,13 @@ def main(args):
     else:
         dataset = dataset.map(preprocess, num_proc=1, load_from_cache_file=True)
 
+    def collator(batch):
+        return {
+            'input_ids': torch.stack([x['input_ids'] for x in batch]),
+            'attention_mask': torch.stack([x['attention_mask'] for x in batch])
+        }
+
+
     # SFTConfig
     trainer_config = SFTConfig(
         num_train_epochs=args.num_epochs,
@@ -135,6 +142,7 @@ def main(args):
                          args=trainer_config,
                          train_dataset=dataset['train'],
                          eval_dataset=dataset['validation'],
+                         data_collator=collator,
                          callbacks=[
                              TrainCallback(batch_size=args.train_batch_size,
                                            world_size=world_size,
