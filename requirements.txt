@@ -9,3 +9,4 @@ sentencepiece
 openai
 tenacity
 trl
+einops

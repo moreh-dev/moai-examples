@@ -11,7 +11,7 @@ from transformers import AdamW
 from transformers import AutoConfig
 from transformers import AutoModelForCausalLM
 from transformers import AutoTokenizer
-
+from torch.nn.utils.rnn import pad_sequence
 from model.internlm.modeling_internlm2 import InternLM2ForCausalLM
 
 from moreh.driver.common import config as moreh_config
@@ -225,6 +225,7 @@ def main(args):
             padding="max_length",
             truncation=True,
             max_length=args.block_size,
+            return_tensors='pt'
         )["input_ids"]
         return {"input_ids": input_ids}
 
@@ -240,6 +241,8 @@ def main(args):
             "role": "assistant",
             "content": f"{prompt['Response']}"
         }]
+        
+        #chat = tokenizer.apply_chat_template(chat, tokenize=True, add_generation_prompt=False, padding="max_length", max_length=args.block_size)
         chat = tokenizer.apply_chat_template(chat, tokenize=False)
         result = tokenizer(chat,
                            truncation=True,
@@ -247,32 +250,37 @@ def main(args):
                            padding="max_length")
         result['labels'] = copy.deepcopy(result['input_ids'])
         ret = {}
-        ret['input_ids'] = result['input_ids']
+        ret['formatted_chat'] = result['input_ids']
         return ret
 
     if args.dataset_name_or_path == "cnn_dailymail":
         dataset = dataset.map(preprocess,
-                              num_proc=16,
+                              num_proc=1,
                               load_from_cache_file=True)
     else:
         dataset = dataset.map(preprocess_general,
-                              num_proc=16,
-                              load_from_cache_file=True)
-
+                              num_proc=1)
+    
     # Create a DataLoader for the training set
+    # Use collate_fn to ensure that all data samples are of the sample length
     train_dataloader = torch.utils.data.DataLoader(
         dataset["train"],
         batch_size=args.batch_size,
         shuffle=True,
         drop_last=True,
+        collate_fn = lambda batch: torch.stack([torch.tensor(sample['formatted_chat']) for sample in batch])
     )
+
+    # Use collate_fn to ensure that all data samples are of the sample length
     # Create a DataLoader for the validation set
     eval_dataloader = torch.utils.data.DataLoader(
         dataset["validation"],
         batch_size=args.eval_batch_size,
         shuffle=True,
         drop_last=True,
+        collate_fn = lambda batch: torch.stack([torch.tensor(sample['formatted_chat']) for sample in batch])
     )
+
     # Prepare the model for training on Accelerator
     model.cuda()
     model.train()
@@ -286,7 +294,8 @@ def main(args):
         for step, batch in enumerate(train_dataloader, start=1):
             # if step > 10: break
             start_time = time.perf_counter()
-            input_ids = batch["input_ids"]
+            #print(batch)
+            input_ids = batch # Because of collate_fn, just use batch directly.
             print(input_ids.shape)
             inputs, labels = input_ids, mask_pads(input_ids, tokenizer)
             attn_mask = create_mask(inputs, tokenizer)
