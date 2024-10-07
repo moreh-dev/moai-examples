@@ -62,7 +62,7 @@ def load_model(args):
         from model.internlm.modeling_internlm2 import InternLM2ForCausalLM
         model = InternLM2ForCausalLM.from_pretrained(args.model_name_or_path,
                                                      trust_remote_code=True)
-        model = convert_qkv_unfused(model)
+        #model = convert_qkv_unfused(model)
         print(
             f"[WARNING] InternLM model is testing, the saved model configs are different from original"
         )
