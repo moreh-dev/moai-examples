@@ -1,1 +1,7 @@
 logs/
+
+# moreh files
+*.dump
+
+# cache
+__pycache__/

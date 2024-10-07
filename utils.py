@@ -24,6 +24,21 @@ KEY = [
 LORA_KEY = ['lora_alpha', 'lora_dropout', 'lora_r']
 
 
+# Compose pad token mask
+def create_mask(input_ids, tokenizer):
+    pad_token_ids = (tokenizer.pad_token_id if tokenizer.pad_token_id
+                     is not None else tokenizer.eos_token_id)
+    return (input_ids != pad_token_ids).long()
+
+
+# Mask pad tokens
+def mask_pads(input_ids, attention_mask, ignore_index=-100):
+    idx_mask = attention_mask
+    labels = copy.deepcopy(input_ids)
+    labels[~idx_mask.bool()] = ignore_index
+    return labels
+
+
 def load_model(args):
     print(f"Loading {args.model_name_or_path} Tokenizer...")
     set_mem_usage_correction_ratio(args)
@@ -47,7 +62,7 @@ def load_model(args):
         from model.internlm.modeling_internlm2 import InternLM2ForCausalLM
         model = InternLM2ForCausalLM.from_pretrained(args.model_name_or_path,
                                                      trust_remote_code=True)
-        #model = convert_qkv_unfused(model)
+        model = convert_qkv_unfused(model)
         print(
             f"[WARNING] InternLM model is testing, the saved model configs are different from original"
         )
@@ -80,6 +95,72 @@ def load_model(args):
     print_trainable_parameters(model)
     return model, tokenizer
 
+
+
+def create_dataloader(args, tokenizer, preprocessor):
+    if 'bitext' in args.dataset_name_or_path.lower(
+    ) and 'csv' in args.dataset_name_or_path.lower():
+        dataset = load_dataset(
+            'csv', data_files=args.dataset_name_or_path).with_format("torch")
+        if "validation" not in dataset:
+            dataset["train"] = load_dataset(
+                'csv',
+                data_files=args.dataset_name_or_path,
+                split="train[:95%]").with_format("torch")
+            dataset["validation"] = load_dataset(
+                'csv',
+                data_files=args.dataset_name_or_path,
+                split="train[95%:]").with_format("torch")
+    else:
+        dataset = load_dataset(args.dataset_name_or_path,
+                               args.dataset_config_name).with_format("torch")
+        if "validation" not in dataset:
+            dataset["train"] = load_dataset(
+                args.dataset_name_or_path,
+                args.dataset_config_name,
+                split="train[:95%]").with_format("torch")
+            dataset["validation"] = load_dataset(
+                args.dataset_name_or_path,
+                args.dataset_config_name,
+                split="train[95%:]").with_format("torch")
+
+    # Tokenize and prepare the input prompt
+    def preprocess(prompt):
+        tokenized = tokenizer(
+            preprocessor(prompt),
+            padding="max_length",
+            truncation=True,
+            max_length=args.block_size,
+        )
+        return {
+            "input_ids": tokenized["input_ids"],
+            "attention_mask": tokenized["attention_mask"],
+        }
+
+    def collator(batch):
+        return {
+            'input_ids': torch.stack([x['input_ids'] for x in batch]),
+            'attention_mask': torch.stack([x['attention_mask'] for x in batch])
+        }
+
+    # Preprocess dataset
+    dataset = dataset.map(preprocess, num_proc=16, load_from_cache_file=True)
+
+    # Create a DataLoader for the training set
+    train_dataloader = torch.utils.data.DataLoader(
+        dataset["train"],
+        batch_size=args.train_batch_size,
+        shuffle=True,
+        drop_last=True,
+        collate_fn=collator)
+
+    # Create a DataLoader for the validation set
+    eval_dataloader = torch.utils.data.DataLoader(
+        dataset["validation"],
+        batch_size=args.eval_batch_size,
+        collate_fn=collator)
+
+    return train_dataloader, eval_dataloader
 
 def convert_qkv_unfused(model):
     config = model.config
@@ -130,6 +211,7 @@ def convert_qkv_unfused(model):
                                                                      head_dim))
         del module.wqkv
 
+    return model
 
 def print_perf(tco_perf_dict):
     # Calculate the averages
@@ -205,19 +287,6 @@ def set_mem_usage_correction_ratio(args):
             args.memory_usage_correction_ratio)
 
 
-# Compose pad token mask
-def create_mask(input_ids, tokenizer):
-    pad_token_ids = (tokenizer.pad_token_id if tokenizer.pad_token_id
-                     is not None else tokenizer.eos_token_id)
-    return (input_ids != pad_token_ids).long()
-
-
-# Mask pad tokens
-def mask_pads(input_ids, attention_mask, ignore_index=-100):
-    idx_mask = attention_mask
-    labels = copy.deepcopy(input_ids)
-    labels[~idx_mask.bool()] = ignore_index
-    return labels
 
 
 def doc_to_text(doc):
@@ -233,71 +302,6 @@ def doc_to_target(doc):
 
     return targets
 
-
-def create_dataloader(args, tokenizer, preprocessor):
-    if 'bitext' in args.dataset_name_or_path.lower(
-    ) and 'csv' in args.dataset_name_or_path.lower():
-        dataset = load_dataset(
-            'csv', data_files=args.dataset_name_or_path).with_format("torch")
-        if "validation" not in dataset:
-            dataset["train"] = load_dataset(
-                'csv',
-                data_files=args.dataset_name_or_path,
-                split="train[:95%]").with_format("torch")
-            dataset["validation"] = load_dataset(
-                'csv',
-                data_files=args.dataset_name_or_path,
-                split="train[95%:]").with_format("torch")
-    else:
-        dataset = load_dataset(args.dataset_name_or_path,
-                               args.dataset_config_name).with_format("torch")
-        if "validation" not in dataset:
-            dataset["train"] = load_dataset(
-                args.dataset_name_or_path,
-                args.dataset_config_name,
-                split="train[:95%]").with_format("torch")
-            dataset["validation"] = load_dataset(
-                args.dataset_name_or_path,
-                args.dataset_config_name,
-                split="train[95%:]").with_format("torch")
-
-    # Tokenize and prepare the input prompt
-    def preprocess(prompt):
-        tokenized = tokenizer(
-            preprocessor(prompt),
-            padding="max_length",
-            truncation=True,
-            max_length=args.block_size,
-        )
-        return {
-            "input_ids": tokenized["input_ids"],
-            "attention_mask": tokenized["attention_mask"],
-        }
-
-    def collator(batch):
-        return {
-            'input_ids': torch.stack([x['input_ids'] for x in batch]),
-            'attention_mask': torch.stack([x['attention_mask'] for x in batch])
-        }
-
-    # Preprocess dataset
-    dataset = dataset.map(preprocess, num_proc=16, load_from_cache_file=True)
-
-    # Create a DataLoader for the training set
-    train_dataloader = torch.utils.data.DataLoader(
-        dataset["train"],
-        batch_size=args.train_batch_size,
-        shuffle=True,
-        drop_last=True,
-        collate_fn=collator)
-
-    # Create a DataLoader for the validation set
-    eval_dataloader = torch.utils.data.DataLoader(
-        dataset["validation"],
-        batch_size=args.eval_batch_size,
-        collate_fn=collator)
-
-    return train_dataloader, eval_dataloader
 
 
 class Preprocessor:

@@ -3,66 +3,31 @@ import copy
 import os
 import sys
 import time
-
 from datasets import load_dataset
 from loguru import logger
 import torch
 from transformers import AdamW
 from transformers import AutoConfig
-from transformers import AutoModelForCausalLM
 from transformers import AutoTokenizer
-from torch.nn.utils.rnn import pad_sequence
 from model.internlm.modeling_internlm2 import InternLM2ForCausalLM
-
-from moreh.driver.common import config as moreh_config
-
-
-# Compose pad token mask
-def create_mask(input_ids, tokenizer):
-    pad_token_ids = (tokenizer.pad_token_id if tokenizer.pad_token_id
-                     is not None else tokenizer.eos_token_id)
-    return (input_ids != pad_token_ids).long()
-
-
-# Mask pad tokens
-def mask_pads(inputs, tokenizer, ignore_index=-100):
-    idx_mask = create_mask(inputs, tokenizer)
-    labels = copy.deepcopy(inputs)
-    labels[~idx_mask.bool()] = ignore_index
-    return labels
-
-
-def print_trainable_parameters(model):
-    """
-    Prints the number of trainable parameters in the model.
-    """
-    trainable_params = 0
-    all_param = 0
-    for _, param in model.named_parameters():
-        all_param += param.numel()
-        if param.requires_grad:
-            trainable_params += param.numel()
-    print(
-        f"trainable params: {trainable_params} || all params: {all_param} || trainable%: {100 * trainable_params / all_param}"
-    )
-
+from utils import *
 
 # Arguments
 def parse_args():
-    parser = ArgumentParser(description="LLaMA3 FineTuning")
+    parser = ArgumentParser(description="InternLM FineTuning")
     parser.add_argument(
         "--model-name-or-path",
         type=str,
-        default="meta-llama/Meta-Llama-3-70B",
+        default="internlm/internlm2_5-20b-chat",
         help="model name or path",
     )
     parser.add_argument("--epochs",
                         type=int,
                         default=1,
                         help="num training epochs")
-    parser.add_argument("--batch-size",
+    parser.add_argument("--train-batch-size",
                         type=int,
-                        default=512,
+                        default=16,
                         help="train bacth size")
     parser.add_argument("--eval-batch-size",
                         type=int,
@@ -75,7 +40,7 @@ def parse_args():
     parser.add_argument(
         "--dataset-name-or-path",
         type=str,
-        default="cnn_dailymail",
+        default="agileloop/izaz-sequence-of-actions-prediction-dataset-llama2-7b-32k",
         help="dataset name or path",
     )
     parser.add_argument("--lr",
@@ -84,32 +49,22 @@ def parse_args():
                         help="learning rate")
     parser.add_argument("--log-interval",
                         type=int,
-                        default=10,
+                        default=20,
                         help="log interval")
     parser.add_argument(
         "--eval-step",
         type=int,
-        default=100,
+        default=1000,
     )
     parser.add_argument(
         "--save-path",
         type=str,
-        default="./llama3_70b_summarization",
+        default="./internlm2_5-20b-finetuned",
         help="model save path",
     )
     parser.add_argument(
         "--use-lora",
         action="store_true",
-    )
-    parser.add_argument(
-        "--num-micro-batches",
-        type=int,
-        default=4,
-    )
-    parser.add_argument(
-        "--num-hidden-layers",
-        type=int,
-        default=48,
     )
     parser.add_argument(
         "--lora-alpha",
@@ -138,19 +93,15 @@ def eval(model, eval_dataloader, tokenizer):
         eval_loss = torch.tensor([0], device="cuda")
         total_correct = torch.tensor([0], device="cuda")
         for e_step, e_batch in enumerate(eval_dataloader, start=1):
-            # if e_step > 10:
-            #     break
-            e_input_ids = e_batch
-            e_inputs, e_labels = e_input_ids, mask_pads(e_input_ids, tokenizer)
-            e_attn_mask = create_mask(e_inputs, tokenizer)
+            e_input_ids = e_batch['input_ids']
+            e_attn_mask = e_batch['attenion_mask']
+            e_inputs, e_labels = e_input_ids, mask_pads(e_input_ids, e_attn_mask)
             e_position_ids = e_attn_mask.long().cumsum(-1) - 1
             e_position_ids.masked_fill_(e_attn_mask == 0, 1)
-            #e_position_ids = e_position_ids.cuda()
             if e_step % 10 == 0:
                 logger.info(f"EVAL STEP: {e_step} / {len(eval_dataloader)}")
             e_outputs = model(
                 e_inputs.cuda(),
-                #attention_mask=e_attn_mask.cuda(),
                 attention_mask=e_attn_mask,
                 position_ids=e_position_ids,
                 labels=e_labels.cuda(),
@@ -173,7 +124,6 @@ def main(args):
                                         trust_remote_code=True)
     model = InternLM2ForCausalLM.from_pretrained(args.model_name_or_path,
                                                  trust_remote_code=True)
-    # tokenizer.pad_token_id = 0
     if args.use_lora:
         from peft import get_peft_model
         from peft import LoraConfig
@@ -188,52 +138,17 @@ def main(args):
         model = get_peft_model(model, config)
     print_trainable_parameters(model)
     print(f"Downloading {args.dataset_name_or_path} dataset...")
-    if args.dataset_name_or_path == "cnn_dailymail":
-        dataset = load_dataset(args.dataset_name_or_path,
-                               "3.0.0").with_format("torch")
-        dataset["train"] = load_dataset(args.dataset_name_or_path,
-                                        "3.0.0",
-                                        split="train[:1%]").with_format("torch")
+    dataset = load_dataset(args.dataset_name_or_path).with_format("torch")
+    if "validation" not in dataset:
+        dataset["train"] = load_dataset(
+            args.dataset_name_or_path,
+            split="train[:90%]").with_format("torch")
         dataset["validation"] = load_dataset(
-            args.dataset_name_or_path, "3.0.0",
-            split="validation[:1%]").with_format("torch")
-        dataset["test"] = load_dataset(args.dataset_name_or_path,
-                                       "3.0.0",
-                                       split="test[:1%]").with_format("torch")
-    else:
-        dataset = load_dataset(args.dataset_name_or_path).with_format("torch")
-        if "validation" not in dataset:
-            dataset["train"] = load_dataset(
-                args.dataset_name_or_path,
-                split="train[:5%]").with_format("torch")
-            dataset["validation"] = load_dataset(
-                args.dataset_name_or_path,
-                split="train[95%:]").with_format("torch")
+            args.dataset_name_or_path,
+            split="train[90%:95%]").with_format("torch")
+    
     # Construct a formatted prompt
-    def create_prompt(prompt):
-        full_prompt = (
-            f"[SUMMARIZE] {prompt['article']} [/SUMMARIZE]\n{prompt['highlights']}</s>"
-        )
-        return full_prompt
-
-    # Tokenize and prepare the input prompt
     def preprocess(prompt):
-        input_ids = tokenizer(
-            create_prompt(prompt),
-            return_attention_mask=False,
-            return_token_type_ids=False,
-            padding="max_length",
-            truncation=True,
-            max_length=args.block_size,
-            return_tensors='pt'
-        )["input_ids"]
-        return {"input_ids": input_ids}
-
-    print("Preprocessing dataset...")
-
-    # Preprocess dataset
-
-    def preprocess_general(prompt):
         chat = [{
             "role": "user",
             "content": f"{prompt['Instruction']}"
@@ -242,34 +157,34 @@ def main(args):
             "content": f"{prompt['Response']}"
         }]
         
-        #chat = tokenizer.apply_chat_template(chat, tokenize=True, add_generation_prompt=False, padding="max_length", max_length=args.block_size)
         chat = tokenizer.apply_chat_template(chat, tokenize=False)
         result = tokenizer(chat,
                            truncation=True,
                            max_length=args.block_size,
                            padding="max_length")
-        result['labels'] = copy.deepcopy(result['input_ids'])
         ret = {}
-        ret['formatted_chat'] = result['input_ids']
+        ret['input_ids'] = result['input_ids']
+        ret['attention_mask'] = result['attention_mask']
         return ret
 
-    if args.dataset_name_or_path == "cnn_dailymail":
-        dataset = dataset.map(preprocess,
-                              num_proc=1,
-                              load_from_cache_file=True)
-    else:
-        dataset = dataset.map(preprocess_general,
-                              num_proc=1)
+    def collator(data):
+        return {
+            'input_ids' : torch.stack([x['input_ids'] for x in data]),
+            'attention_mask' : torch.stack([x['attention_mask'] for x in data])
+            }
+
+
+    dataset = dataset.map(preprocess, num_proc=8)
     
     # Create a DataLoader for the training set
     # Use collate_fn to ensure that all data samples are of the sample length
     train_dataloader = torch.utils.data.DataLoader(
         dataset["train"],
-        batch_size=args.batch_size,
+        batch_size=args.train_batch_size,
         shuffle=True,
         drop_last=True,
-        collate_fn = lambda batch: torch.stack([torch.tensor(sample['formatted_chat']) for sample in batch])
-    )
+        collate_fn=collator,
+        )
 
     # Use collate_fn to ensure that all data samples are of the sample length
     # Create a DataLoader for the validation set
@@ -278,7 +193,7 @@ def main(args):
         batch_size=args.eval_batch_size,
         shuffle=True,
         drop_last=True,
-        collate_fn = lambda batch: torch.stack([torch.tensor(sample['formatted_chat']) for sample in batch])
+        collate_fn=collator
     )
 
     # Prepare the model for training on Accelerator
@@ -292,19 +207,14 @@ def main(args):
     for epoch in range(args.epochs):
         st = time.time()
         for step, batch in enumerate(train_dataloader, start=1):
-            # if step > 10: break
             start_time = time.perf_counter()
-            #print(batch)
-            input_ids = batch # Because of collate_fn, just use batch directly.
-            print(input_ids.shape)
-            inputs, labels = input_ids, mask_pads(input_ids, tokenizer)
-            attn_mask = create_mask(inputs, tokenizer)
+            input_ids = batch['input_ids'] # Because of collate_fn, just use batch directly.
+            attn_mask = batch['attention_mask']
+            inputs, labels = input_ids, mask_pads(input_ids, attn_mask)
             position_ids = attn_mask.long().cumsum(-1) - 1
             position_ids.masked_fill_(attn_mask == 0, 1)
-            #position_ids = position_ids.cuda()
             outputs = model(
                 input_ids.cuda(),
-                #attention_mask=attn_mask.cuda(),
                 attention_mask=attn_mask,
                 labels=labels.cuda(),
                 position_ids=position_ids,
@@ -337,7 +247,7 @@ def main(args):
                 model.train()
                 st = time.time()
         # Evaluation
-        # eval(model, eval_dataloader, tokenizer)
+        eval(model, eval_dataloader, tokenizer)
         model.train()
         st = time.time()
     print("Training Done")
