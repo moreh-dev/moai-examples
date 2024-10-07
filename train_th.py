@@ -140,7 +140,7 @@ def eval(model, eval_dataloader, tokenizer):
         for e_step, e_batch in enumerate(eval_dataloader, start=1):
             # if e_step > 10:
             #     break
-            e_input_ids = e_batch["input_ids"]
+            e_input_ids = e_batch
             e_inputs, e_labels = e_input_ids, mask_pads(e_input_ids, tokenizer)
             e_attn_mask = create_mask(e_inputs, tokenizer)
             e_position_ids = e_attn_mask.long().cumsum(-1) - 1
@@ -173,7 +173,7 @@ def main(args):
                                         trust_remote_code=True)
     model = InternLM2ForCausalLM.from_pretrained(args.model_name_or_path,
                                                  trust_remote_code=True)
-    tokenizer.pad_token_id = 0
+    # tokenizer.pad_token_id = 0
     if args.use_lora:
         from peft import get_peft_model
         from peft import LoraConfig
