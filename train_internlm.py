@@ -3,14 +3,17 @@ import copy
 import os
 import sys
 import time
+
 from datasets import load_dataset
 from loguru import logger
 import torch
 from transformers import AdamW
 from transformers import AutoConfig
 from transformers import AutoTokenizer
+
 from model.internlm.modeling_internlm2 import InternLM2ForCausalLM
 from utils import *
+
 
 # Arguments
 def parse_args():
@@ -40,7 +43,8 @@ def parse_args():
     parser.add_argument(
         "--dataset-name-or-path",
         type=str,
-        default="agileloop/izaz-sequence-of-actions-prediction-dataset-llama2-7b-32k",
+        default=
+        "agileloop/izaz-sequence-of-actions-prediction-dataset-llama2-7b-32k",
         help="dataset name or path",
     )
     parser.add_argument("--lr",
@@ -95,7 +99,8 @@ def eval(model, eval_dataloader, tokenizer):
         for e_step, e_batch in enumerate(eval_dataloader, start=1):
             e_input_ids = e_batch['input_ids']
             e_attn_mask = e_batch['attenion_mask']
-            e_inputs, e_labels = e_input_ids, mask_pads(e_input_ids, e_attn_mask)
+            e_inputs, e_labels = e_input_ids, mask_pads(e_input_ids,
+                                                        e_attn_mask)
             e_position_ids = e_attn_mask.long().cumsum(-1) - 1
             e_position_ids.masked_fill_(e_attn_mask == 0, 1)
             if e_step % 10 == 0:
@@ -141,12 +146,11 @@ def main(args):
     dataset = load_dataset(args.dataset_name_or_path).with_format("torch")
     if "validation" not in dataset:
         dataset["train"] = load_dataset(
-            args.dataset_name_or_path,
-            split="train[:90%]").with_format("torch")
+            args.dataset_name_or_path, split="train[:90%]").with_format("torch")
         dataset["validation"] = load_dataset(
             args.dataset_name_or_path,
             split="train[90%:95%]").with_format("torch")
-    
+
     # Construct a formatted prompt
     def preprocess(prompt):
         chat = [{
@@ -156,7 +160,7 @@ def main(args):
             "role": "assistant",
             "content": f"{prompt['Response']}"
         }]
-        
+
         chat = tokenizer.apply_chat_template(chat, tokenize=False)
         result = tokenizer(chat,
                            truncation=True,
@@ -169,13 +173,12 @@ def main(args):
 
     def collator(data):
         return {
-            'input_ids' : torch.stack([x['input_ids'] for x in data]),
-            'attention_mask' : torch.stack([x['attention_mask'] for x in data])
-            }
-
+            'input_ids': torch.stack([x['input_ids'] for x in data]),
+            'attention_mask': torch.stack([x['attention_mask'] for x in data])
+        }
 
     dataset = dataset.map(preprocess, num_proc=8)
-    
+
     # Create a DataLoader for the training set
     # Use collate_fn to ensure that all data samples are of the sample length
     train_dataloader = torch.utils.data.DataLoader(
@@ -184,7 +187,7 @@ def main(args):
         shuffle=True,
         drop_last=True,
         collate_fn=collator,
-        )
+    )
 
     # Use collate_fn to ensure that all data samples are of the sample length
     # Create a DataLoader for the validation set
@@ -193,8 +196,7 @@ def main(args):
         batch_size=args.eval_batch_size,
         shuffle=True,
         drop_last=True,
-        collate_fn=collator
-    )
+        collate_fn=collator)
 
     # Prepare the model for training on Accelerator
     model.cuda()
@@ -208,7 +210,7 @@ def main(args):
         st = time.time()
         for step, batch in enumerate(train_dataloader, start=1):
             start_time = time.perf_counter()
-            input_ids = batch['input_ids'] # Because of collate_fn, just use batch directly.
+            input_ids = batch['input_ids']
             attn_mask = batch['attention_mask']
             inputs, labels = input_ids, mask_pads(input_ids, attn_mask)
             position_ids = attn_mask.long().cumsum(-1) - 1
@@ -250,11 +252,7 @@ def main(args):
         eval(model, eval_dataloader, tokenizer)
         model.train()
         st = time.time()
-    print("Training Done")
-    print("Saving Model...")
-    model.save_pretrained(args.save_path)
-    tokenizer.save_pretrained(args.save_path)
-    print(f"Model saved in {args.save_path}")
+    save_model(args, model, tokenizer)
 
 
 if __name__ == "__main__":

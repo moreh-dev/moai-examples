@@ -50,7 +50,7 @@ def load_model(args):
         tokenizer = AutoTokenizer.from_pretrained(args.model_name_or_path,
                                                   trust_remote_code=True)
     elif "llama" in configs.architectures[0].lower():
-        from model.modeling_llama2 import LlamaForCausalLM
+        from model.llama.modeling_llama import LlamaForCausalLM
         model = LlamaForCausalLM.from_pretrained(args.model_name_or_path)
         tokenizer = AutoTokenizer.from_pretrained(args.model_name_or_path,
                                                   trust_remote_code=True)
@@ -62,7 +62,7 @@ def load_model(args):
         from model.internlm.modeling_internlm2 import InternLM2ForCausalLM
         model = InternLM2ForCausalLM.from_pretrained(args.model_name_or_path,
                                                      trust_remote_code=True)
-        #model = convert_qkv_unfused(model)
+        model = convert_qkv_unfused(model)
         print(
             f"[WARNING] InternLM model is testing, the saved model configs are different from original"
         )
@@ -95,6 +95,16 @@ def load_model(args):
     print_trainable_parameters(model)
     return model, tokenizer
 
+
+def save_model_and_tokenizer(args, model, tokenizer):
+    print(f"Saving model and tokenzier in {args.save_path}")
+    config = model.config
+    if "internlm" in config.architectures[0].lower():
+        model = convert_qkv_fused(model)
+
+    model.save_pretrained(args.save_path)
+    tokenizer.save_pretrained(args.save_path)
+    print(f"Model and Tokenzier is saved in {args.save_path}")
 
 
 def create_dataloader(args, tokenizer, preprocessor):
@@ -162,6 +172,7 @@ def create_dataloader(args, tokenizer, preprocessor):
 
     return train_dataloader, eval_dataloader
 
+
 def convert_qkv_unfused(model):
     config = model.config
     num_heads = config.num_attention_heads
@@ -212,6 +223,54 @@ def convert_qkv_unfused(model):
         del module.wqkv
 
     return model
+
+
+def convert_qkv_fused(model):
+    config = model.config
+    num_heads = config.num_attention_heads
+    num_key_value_heads = config.num_key_value_heads
+    hidden_size = config.hidden_size
+    num_key_value_groups = num_heads // num_key_value_heads
+    head_dim = hidden_size // num_heads
+    for name, module in model.named_modules():
+        if name.split('.')[-1] != 'attention':
+            continue
+        wqkv = module.wqkv
+        q = module.q
+        k = module.k
+        v = module.v
+        wqkv.weight.requires_grad = False
+        wqkv.weight.view(num_key_value_heads, num_key_value_groups + 2,
+                         head_dim,
+                         hidden_size)[:, :num_key_value_groups, :, :].copy_(
+                             q.weight.view(num_key_value_heads,
+                                           num_key_value_groups, head_dim,
+                                           hidden_size))
+        wqkv.weight.view(num_key_value_heads, num_key_value_groups + 2,
+                         head_dim, hidden_size)[:, -2, :, :].copy_(
+                             k.weight.view(num_key_value_heads, head_dim,
+                                           hidden_size))
+        wqkv.weight.view(num_key_value_heads, num_key_value_groups + 2,
+                         head_dim, hidden_size)[:, -1, :, :].copy_(
+                             v.weight.view(num_key_value_heads, head_dim,
+                                           hidden_size))
+        if config.bias:
+            wqkv.bias.requires_grad = False
+            wqkv.bias.view(num_key_value_heads, num_key_value_groups + 2,
+                           head_dim)[:, :num_key_value_groups, :].copy(
+                               q.bias.view(num_key_value_heads,
+                                           num_key_value_groups, head_dim))
+            wqkv.bias.view(num_key_value_heads, num_key_value_groups + 2,
+                           head_dim)[:, -2, :].copy(
+                               k.bias.view(num_key_value_heads, head_dim))
+            wqkv.bias.view(num_key_value_heads, num_key_value_groups + 2,
+                           head_dim)[:, -1, :].copy(
+                               v.bias.view(num_key_value_heads, head_dim))
+        del module.q
+        del module.k
+        del module.v
+    return model
+
 
 def print_perf(tco_perf_dict):
     # Calculate the averages
@@ -287,8 +346,6 @@ def set_mem_usage_correction_ratio(args):
             args.memory_usage_correction_ratio)
 
 
-
-
 def doc_to_text(doc):
     inputs = " ".join(doc["code_tokens"]).replace("\n", " ")
     inputs = " ".join(inputs.strip().split())
@@ -301,7 +358,6 @@ def doc_to_target(doc):
     targets = " ".join(targets.strip().split())
 
     return targets
-
 
 
 class Preprocessor:

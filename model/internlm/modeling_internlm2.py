@@ -288,15 +288,13 @@ class InternLM2Attention(nn.Module):
             raise ValueError(
                 f"hidden_size must be divisible by num_heads (got `hidden_size`: {self.hidden_size}"
                 f" and `num_heads`: {self.num_heads}).")
-       
-        ''' 
+
         self.wqkv = nn.Linear(
             self.hidden_size,
             (self.num_heads + 2 * self.num_key_value_heads) * self.head_dim,
             bias=config.bias,
         )
-        '''
-        
+
         self.q = nn.Linear(self.hidden_size, self.hidden_size, bias=config.bias)
         self.k = nn.Linear(self.hidden_size,
                            self.num_key_value_heads * self.head_dim,

@@ -18,7 +18,6 @@ from transformers import AutoTokenizer
 from trl import SFTConfig
 from trl import SFTTrainer
 
-from model.modeling_llama import LlamaForCausalLM
 from utils import *
 
 
@@ -96,19 +95,18 @@ def main(args):
 
     if args.dataset_name_or_path == "bitext/Bitext-customer-support-llm-chatbot-training-dataset":
         dataset['train'] = dataset['train'].map(preprocess,
-                                                num_proc=1,
+                                                num_proc=8,
                                                 load_from_cache_file=True)
         dataset['validation'] = dataset['validation'].map(
-            preprocess, num_proc=1, load_from_cache_file=True)
+            preprocess, num_proc=8, load_from_cache_file=True)
     else:
-        dataset = dataset.map(preprocess, num_proc=1, load_from_cache_file=True)
+        dataset = dataset.map(preprocess, num_proc=8, load_from_cache_file=True)
 
     def collator(batch):
         return {
             'input_ids': torch.stack([x['input_ids'] for x in batch]),
             'attention_mask': torch.stack([x['attention_mask'] for x in batch])
         }
-
 
     # SFTConfig
     trainer_config = SFTConfig(
@@ -137,18 +135,19 @@ def main(args):
     total_train_steps = (len(dataset["train"]) //
                          (world_size * args.train_batch_size)) * args.num_epochs
 
-    trainer = SFTTrainer(model,
-                         tokenizer=tokenizer,
-                         args=trainer_config,
-                         train_dataset=dataset['train'],
-                         eval_dataset=dataset['validation'],
-                         data_collator=collator,
-                         callbacks=[
-                             TrainCallback(batch_size=args.train_batch_size,
-                                           world_size=world_size,
-                                           warm_up_st=warm_up_st,
-                                           total_steps=total_train_steps)
-                         ])
+    trainer = SFTTrainer(
+        model,
+        tokenizer=tokenizer,
+        args=trainer_config,
+        train_dataset=dataset['train'],
+        eval_dataset=dataset['validation'],
+        #data_collator=collator,
+        callbacks=[
+            TrainCallback(batch_size=args.train_batch_size,
+                          world_size=world_size,
+                          warm_up_st=warm_up_st,
+                          total_steps=total_train_steps)
+        ])
 
     trainer.train()
     if accelerator.is_local_main_process:
