@@ -17,7 +17,6 @@ import transformers
 from transformers import AutoTokenizer
 from trl import SFTConfig
 from trl import SFTTrainer
-
 from utils import *
 
 
@@ -64,49 +63,8 @@ def main(args):
         transformers.utils.logging.set_verbosity_error()
 
     model, tokenizer = load_model(args)
-
-    if args.dataset_name_or_path == "bitext/Bitext-customer-support-llm-chatbot-training-dataset":
-        dataset = {}
-        dataset["train"] = load_dataset(args.dataset_name_or_path,
-                                        split="train[95%:]")
-        dataset["validation"] = load_dataset(args.dataset_name_or_path,
-                                             split="train[:5%]")
-    else:
-        dataset = load_dataset(args.dataset_name_or_path)
-
-    def preprocess(prompt):
-        chat = [
-            {
-                "role": "user",
-                "content": f"{prompt['instruction']}"
-            },
-            {
-                "role": "assistant",
-                "content": f"{prompt['response']}"
-            },
-        ]
-        chat = tokenizer.apply_chat_template(chat, tokenize=False)
-        result = tokenizer(chat,
-                           truncation=True,
-                           max_length=args.block_size,
-                           padding="max_length")
-        result['labels'] = copy.deepcopy(result['input_ids'])
-        return result
-
-    if args.dataset_name_or_path == "bitext/Bitext-customer-support-llm-chatbot-training-dataset":
-        dataset['train'] = dataset['train'].map(preprocess,
-                                                num_proc=8,
-                                                load_from_cache_file=True)
-        dataset['validation'] = dataset['validation'].map(
-            preprocess, num_proc=8, load_from_cache_file=True)
-    else:
-        dataset = dataset.map(preprocess, num_proc=8, load_from_cache_file=True)
-
-    def collator(batch):
-        return {
-            'input_ids': torch.stack([x['input_ids'] for x in batch]),
-            'attention_mask': torch.stack([x['attention_mask'] for x in batch])
-        }
+    dataset = prepare_dataset(args)
+    dataset = preprocess_dataset(args, dataset, tokenizer)
 
     # SFTConfig
     trainer_config = SFTConfig(
@@ -135,23 +93,21 @@ def main(args):
     total_train_steps = (len(dataset["train"]) //
                          (world_size * args.train_batch_size)) * args.num_epochs
 
-    trainer = SFTTrainer(
-        model,
-        tokenizer=tokenizer,
-        args=trainer_config,
-        train_dataset=dataset['train'],
-        eval_dataset=dataset['validation'],
-        #data_collator=collator,
-        callbacks=[
-            TrainCallback(batch_size=args.train_batch_size,
-                          world_size=world_size,
-                          warm_up_st=warm_up_st,
-                          total_steps=total_train_steps)
-        ])
-
+    trainer = AmbreTrainer(model,
+                           tokenizer=tokenizer,
+                           args=trainer_config,
+                           train_dataset=dataset['train'],
+                           eval_dataset=dataset['validation'],
+                           callbacks=[
+                               TrainCallback(
+                                   batch_size=args.train_batch_size,
+                                   world_size=world_size,
+                                   warm_up_st=warm_up_st,
+                                   total_steps=total_train_steps,
+                               )
+                           ])
     trainer.train()
-    if accelerator.is_local_main_process:
-        print("Skip to save model")
+    trainer.save_model()
 
 
 if __name__ == "__main__":

@@ -7,4 +7,4 @@ python train_internlm.py \
   --block-size 32768 \
   --model-name-or-path /nas/team_cx/checkpoints/internlm2_5-20b-chat \
   --dataset-name-or-path agileloop/izaz-sequence-of-actions-prediction-dataset-llama2-7b-32k \
-  --save-path /nas/team_cx/checkpoints/internlm2_5-20b-chat-finetuned
+  --save-path /nas/team_cx/checkpoints/internlm2_5-20b-chat-finetuned-jy

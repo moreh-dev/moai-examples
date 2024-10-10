@@ -469,6 +469,14 @@ class InternLM2Attention(nn.Module):
 
         return attn_output, attn_weights, past_key_value
 
+    def add_wqkv_layer(self):
+        self.wqkv = nn.Linear(
+            6144,
+            (48 + 2 * 8) * (6144 // 48),
+            bias=False,
+        )
+        self.wqkv.cuda()
+
 
 class InternLM2FlashAttention2(InternLM2Attention):
     """

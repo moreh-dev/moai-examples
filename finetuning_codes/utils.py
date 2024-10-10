@@ -1,17 +1,34 @@
 import copy
 import datetime
+import importlib.metadata
+import os
 import sys
 import time
+from typing import Any, Mapping, Optional, Union
 
 from accelerate.logging import get_logger
+from datasets import load_dataset
+from packaging import version
+from peft import PeftModel
 import torch
+from torch.utils.data import DataLoader
+from torch.utils.data import Dataset
+from torch.utils.data import IterableDataset
+from torch.utils.data import RandomSampler
+from torch.utils.data import SequentialSampler
 from tqdm.auto import tqdm
 from transformers import AutoConfig
 from transformers import AutoModelForCausalLM
 from transformers import AutoTokenizer
 from transformers import TrainerCallback
-
-from moreh.driver.common import config as moreh_config
+from transformers.modeling_utils import PreTrainedModel
+from transformers.models.auto.modeling_auto import MODEL_FOR_CAUSAL_LM_MAPPING_NAMES
+from transformers.models.auto.modeling_auto import MODEL_MAPPING_NAMES
+from transformers.trainer_pt_utils import LabelSmoother
+from transformers.trainer_utils import seed_worker
+from transformers.utils import is_datasets_available
+from transformers.utils import is_peft_available
+from trl import SFTTrainer
 
 DEFAULT_SYSTEM_PROMPT = "You are a helpful assistant."
 
@@ -62,7 +79,7 @@ def load_model(args):
         from model.internlm.modeling_internlm2 import InternLM2ForCausalLM
         model = InternLM2ForCausalLM.from_pretrained(args.model_name_or_path,
                                                      trust_remote_code=True)
-        model = convert_qkv_unfused(model)
+        #model = convert_qkv_unfused(model)
         print(
             f"[WARNING] InternLM model is testing, the saved model configs are different from original"
         )
@@ -105,6 +122,83 @@ def save_model_and_tokenizer(args, model, tokenizer):
     model.save_pretrained(args.save_path)
     tokenizer.save_pretrained(args.save_path)
     print(f"Model and Tokenzier is saved in {args.save_path}")
+
+
+def prepare_dataset(args):
+    if args.dataset_name_or_path == "bitext/Bitext-customer-support-llm-chatbot-training-dataset":
+        dataset = {}
+        dataset["train"] = load_dataset(args.dataset_name_or_path,
+                                        split="train[95%:]")
+        dataset["validation"] = load_dataset(args.dataset_name_or_path,
+                                             split="train[:5%]")
+    elif args.dataset_name_or_path == "agileloop/izaz-sequence-of-actions-prediction-dataset-llama2-7b-32k":
+        dataset = {}
+        dataset["train"] = load_dataset(args.dataset_name_or_path,
+                                        split="train[:5%]")
+        dataset["validation"] = load_dataset(args.dataset_name_or_path,
+                                             split="train[90%:95%]")
+    else:
+        dataset = load_dataset(args.dataset_name_or_path)
+
+    return dataset
+
+
+def preprocess_dataset(args, dataset, tokenizer):
+
+    def preprocess(prompt):
+        chat = [
+            {
+                "role": "user",
+                "content": f"{prompt['instruction']}"
+            },
+            {
+                "role": "assistant",
+                "content": f"{prompt['response']}"
+            },
+        ]
+        chat = tokenizer.apply_chat_template(chat, tokenize=False)
+        result = tokenizer(chat,
+                           truncation=True,
+                           max_length=args.block_size,
+                           padding="max_length")
+        result['labels'] = copy.deepcopy(result['input_ids'])
+        return result
+
+    def preprocess_agileloop(prompt):
+        chat = [
+            {
+                "role": "user",
+                "content": f"{prompt['Instruction']}"
+            },
+            {
+                "role": "assistant",
+                "content": f"{prompt['Response']}"
+            },
+        ]
+        chat = tokenizer.apply_chat_template(chat, tokenize=False)
+        result = tokenizer(chat,
+                           truncation=True,
+                           max_length=args.block_size,
+                           padding="max_length")
+        result['labels'] = copy.deepcopy(result['input_ids'])
+        return result
+
+    if args.dataset_name_or_path == "bitext/Bitext-customer-support-llm-chatbot-training-dataset":
+        dataset['train'] = dataset['train'].map(preprocess,
+                                                num_proc=1,
+                                                load_from_cache_file=True)
+        dataset['validation'] = dataset['validation'].map(
+            preprocess, num_proc=1, load_from_cache_file=True)
+    elif args.dataset_name_or_path == "agileloop/izaz-sequence-of-actions-prediction-dataset-llama2-7b-32k":
+        dataset['train'] = dataset['train'].map(preprocess_agileloop,
+                                                num_proc=1,
+                                                load_from_cache_file=True)
+        dataset['validation'] = dataset['validation'].map(
+            preprocess_agileloop, num_proc=1, load_from_cache_file=True)
+    else:
+        dataset = dataset.map(preprocess, num_proc=1, load_from_cache_file=True)
+
+    return dataset
 
 
 def create_dataloader(args, tokenizer, preprocessor):
@@ -221,7 +315,6 @@ def convert_qkv_unfused(model):
                                head_dim)[:, -1, :].contiguous().view(num_heads *
                                                                      head_dim))
         del module.wqkv
-
     return model
 
 
@@ -360,6 +453,26 @@ def doc_to_target(doc):
     return targets
 
 
+def _is_peft_model(model):
+    if is_peft_available():
+        classes_to_check = (PeftModel,) if is_peft_available() else ()
+        # Here we also check if the model is an instance of `PeftMixedModel` introduced in peft>=0.7.0: https://github.com/huggingface/transformers/pull/28321
+        if version.parse(
+                importlib.metadata.version("peft")) >= version.parse("0.7.0"):
+            from peft import PeftMixedModel
+
+            classes_to_check = (*classes_to_check, PeftMixedModel)
+        return isinstance(model, classes_to_check)
+    return False
+
+
+if is_peft_available():
+    from peft import PeftModel
+
+if is_datasets_available():
+    import datasets
+
+
 class Preprocessor:
 
     def __init__(self, tokenizer, system_prompt, apply_chat_format=False):
@@ -415,6 +528,242 @@ class Preprocessor:
             return self._apply_chat_template(prompt_pair)
         else:
             return self.preprocess_prompt(prompt, *args, **kwargs)
+
+
+class AmbreTrainer(SFTTrainer):
+
+    def _prepare_input(
+            self, data: Union[torch.Tensor, Any]) -> Union[torch.Tensor, Any]:
+        """
+        Prepares one `data` before feeding it to the model, be it a tensor or a nested list/dictionary of tensors.
+        """
+        if isinstance(data, Mapping):
+            return type(data)({
+                k: self._prepare_input(v) for k, v in data.items()
+            })
+        elif isinstance(data, (tuple, list)):
+            return type(data)(self._prepare_input(v) for v in data)
+        elif isinstance(data, torch.Tensor):
+            kwargs = {"device": self.args.device}
+            if self.is_deepspeed_enabled and (torch.is_floating_point(data) or
+                                              torch.is_complex(data)):
+                # NLP models inputs are int/uint and those get adjusted to the right dtype of the
+                # embedding. Other models such as wav2vec2's inputs are already float and thus
+                # may need special handling to match the dtypes of the model
+                kwargs.update({
+                    "dtype":
+                        self.accelerator.state.deepspeed_plugin.hf_ds_config.
+                        dtype()
+                })
+            # return data.to(**kwargs)
+            return data
+        return data
+
+    def compute_loss(self, model, inputs, return_outputs=False):
+        """
+        How the loss is computed by Trainer. By default, all models return the loss in the first element.
+
+        Subclass and override for custom behavior.
+        """
+        if self.label_smoother is not None and "labels" in inputs:
+            labels = inputs.pop("labels")
+        else:
+            labels = None
+        input_ids = inputs[
+            'input_ids']  # Because of collate_fn, just use batch directly.
+        attn_mask = inputs['attention_mask']
+        inputs_copy, new_labels = input_ids, mask_pads(input_ids, attn_mask)
+        position_ids = attn_mask.long().cumsum(-1) - 1
+        position_ids.masked_fill_(attn_mask == 0, 1)
+
+        # if 'attention_mask' in inputs:
+        #     inputs['attention_mask'] = inputs['attention_mask'].to('cpu')  # Keep on CPU
+        # if 'position_ids' in inputs:
+        #     inputs['position_ids'] = inputs['position_ids'].to('cpu')  # Keep on CPU
+        outputs = model(
+            input_ids.cuda(),
+            #attention_mask=attn_mask.cuda(),
+            attention_mask=attn_mask,
+            labels=new_labels.cuda(),
+            position_ids=position_ids,
+            use_cache=False,
+        )
+        # Save past state if it exists
+        # TODO: this needs to be fixed and made cleaner later.
+        if self.args.past_index >= 0:
+            self._past = outputs[self.args.past_index]
+
+        if labels is not None:
+            unwrapped_model = self.accelerator.unwrap_model(model)
+            if _is_peft_model(unwrapped_model):
+                model_name = unwrapped_model.base_model.model._get_name()
+            else:
+                model_name = unwrapped_model._get_name()
+            if model_name in MODEL_FOR_CAUSAL_LM_MAPPING_NAMES.values():
+                loss = self.label_smoother(outputs, labels, shift_labels=True)
+            else:
+                loss = self.label_smoother(outputs, labels)
+        else:
+            if isinstance(outputs, dict) and "loss" not in outputs:
+                raise ValueError(
+                    "The model did not return a loss from the inputs, only the following keys: "
+                    f"{','.join(outputs.keys())}. For reference, the inputs it received are {','.join(inputs.keys())}."
+                )
+            # We don't use .loss here since the model may return tuples instead of ModelOutput.
+            loss = outputs["loss"] if isinstance(outputs, dict) else outputs[0]
+
+        return (loss, outputs) if return_outputs else loss
+
+    def get_train_dataloader(self) -> DataLoader:
+        """
+        Returns the training [`~torch.utils.data.DataLoader`].
+
+        Will use no sampler if `train_dataset` does not implement `__len__`, a random sampler (adapted to distributed
+        training if necessary) otherwise.
+
+        Subclass and override this method if you want to inject some custom behavior.
+        """
+        if self.train_dataset is None:
+            raise ValueError("Trainer: training requires a train_dataset.")
+
+        train_dataset = self.train_dataset
+        data_collator = self.data_collator
+        if is_datasets_available() and isinstance(train_dataset,
+                                                  datasets.Dataset):
+            train_dataset = self._remove_unused_columns(train_dataset,
+                                                        description="training")
+        else:
+            data_collator = self._get_collator_with_removed_columns(
+                data_collator, description="training")
+
+        dataloader_params = {
+            "batch_size": self._train_batch_size,
+            "collate_fn": data_collator,
+            "num_workers": self.args.dataloader_num_workers,
+            "pin_memory": self.args.dataloader_pin_memory,
+            "persistent_workers": self.args.dataloader_persistent_workers,
+        }
+
+        if not isinstance(train_dataset, torch.utils.data.IterableDataset):
+            dataloader_params["sampler"] = self._get_train_sampler()
+            dataloader_params["drop_last"] = self.args.dataloader_drop_last
+            dataloader_params["worker_init_fn"] = seed_worker
+            dataloader_params[
+                "prefetch_factor"] = self.args.dataloader_prefetch_factor
+
+        return self.accelerator.prepare(DataLoader(train_dataset,
+                                                   **dataloader_params),
+                                        device_placement=[False])
+
+    def get_eval_dataloader(
+            self,
+            eval_dataset: Optional[Union[str, Dataset]] = None) -> DataLoader:
+        """
+        Returns the evaluation [`~torch.utils.data.DataLoader`].
+
+        Subclass and override this method if you want to inject some custom behavior.
+
+        Args:
+            eval_dataset (`str` or `torch.utils.data.Dataset`, *optional*):
+                If a `str`, will use `self.eval_dataset[eval_dataset]` as the evaluation dataset. If a `Dataset`, will override `self.eval_dataset` and must implement `__len__`. If it is a [`~datasets.Dataset`], columns not accepted by the `model.forward()` method are automatically removed.
+        """
+        if eval_dataset is None and self.eval_dataset is None:
+            raise ValueError("Trainer: evaluation requires an eval_dataset.")
+
+        # If we have persistent workers, don't do a fork bomb especially as eval datasets
+        # don't change during training
+        dataloader_key = eval_dataset if isinstance(eval_dataset,
+                                                    str) else "eval"
+        if (hasattr(self, "_eval_dataloaders") and
+                dataloader_key in self._eval_dataloaders and
+                self.args.dataloader_persistent_workers):
+            return self.accelerator.prepare(
+                self._eval_dataloaders[dataloader_key],
+                device_placement=[False])
+
+        eval_dataset = (self.eval_dataset[eval_dataset] if isinstance(
+            eval_dataset, str) else eval_dataset
+                        if eval_dataset is not None else self.eval_dataset)
+        data_collator = self.data_collator
+
+        if is_datasets_available() and isinstance(eval_dataset,
+                                                  datasets.Dataset):
+            eval_dataset = self._remove_unused_columns(eval_dataset,
+                                                       description="evaluation")
+        else:
+            data_collator = self._get_collator_with_removed_columns(
+                data_collator, description="evaluation")
+
+        dataloader_params = {
+            "batch_size": self.args.eval_batch_size,
+            "collate_fn": data_collator,
+            "num_workers": self.args.dataloader_num_workers,
+            "pin_memory": self.args.dataloader_pin_memory,
+            "persistent_workers": self.args.dataloader_persistent_workers,
+        }
+
+        if not isinstance(eval_dataset, torch.utils.data.IterableDataset):
+            dataloader_params["sampler"] = self._get_eval_sampler(eval_dataset)
+            dataloader_params["drop_last"] = self.args.dataloader_drop_last
+            dataloader_params[
+                "prefetch_factor"] = self.args.dataloader_prefetch_factor
+
+        # accelerator.free_memory() will destroy the references, so
+        # we need to store the non-prepared version
+        eval_dataloader = DataLoader(eval_dataset, **dataloader_params)
+        if self.args.dataloader_persistent_workers:
+            if hasattr(self, "_eval_dataloaders"):
+                self._eval_dataloaders[dataloader_key] = eval_dataloader
+            else:
+                self._eval_dataloaders = {dataloader_key: eval_dataloader}
+
+        return self.accelerator.prepare(eval_dataloader,
+                                        device_placement=[False])
+
+    def _save(self, output_dir: Optional[str] = None, state_dict=None):
+        # If we are executing this function, we are the process zero, so we don't check for that.
+        output_dir = output_dir if output_dir is not None else self.args.output_dir
+        os.makedirs(output_dir, exist_ok=True)
+        print(f"Saving model checkpoint to {output_dir}")
+
+        supported_classes = (PreTrainedModel,) if not is_peft_available() else (
+            PreTrainedModel, PeftModel)
+        # Save a trained model and configuration using `save_pretrained()`.
+        # They can then be reloaded using `from_pretrained()`
+        if not isinstance(self.model, supported_classes):
+            if state_dict is None:
+                state_dict = self.model.state_dict()
+
+            if isinstance(self.accelerator.unwrap_model(self.model),
+                          supported_classes):
+                self.accelerator.unwrap_model(self.model).save_pretrained(
+                    output_dir,
+                    state_dict=state_dict,
+                    safe_serialization=self.args.save_safetensors)
+            else:
+                print(
+                    "Trainer.model is not a `PreTrainedModel`, only saving its state dict."
+                )
+                if self.args.save_safetensors:
+                    safetensors.torch.save_file(state_dict,
+                                                os.path.join(
+                                                    output_dir,
+                                                    SAFE_WEIGHTS_NAME),
+                                                metadata={"format": "pt"})
+                else:
+                    torch.save(state_dict, os.path.join(output_dir,
+                                                        WEIGHTS_NAME))
+        else:
+            if 'internlm' in self.model.config.architectures[0].lower():
+                pass
+                #self.model = convert_qkv_fused(self.model)
+            self.model.save_pretrained(output_dir)
+
+        if self.processing_class is not None:
+            self.processing_class.save_pretrained(output_dir)
+
+        # Good practice: save your training arguments together with the trained model
+        torch.save(self.args, os.path.join(output_dir, TRAINING_ARGS_NAME))
 
 
 class TrainCallback(TrainerCallback):

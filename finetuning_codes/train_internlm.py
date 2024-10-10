@@ -6,12 +6,11 @@ import time
 
 from datasets import load_dataset
 from loguru import logger
+from model.internlm.modeling_internlm2 import InternLM2ForCausalLM
 import torch
 from transformers import AdamW
 from transformers import AutoConfig
 from transformers import AutoTokenizer
-
-from model.internlm.modeling_internlm2 import InternLM2ForCausalLM
 from utils import *
 
 
@@ -240,7 +239,7 @@ def main(args):
                 else:
                     step_interval = args.log_interval
                 logger.info(
-                    f"[Step {step+(epoch*len(train_dataloader))}/{total_step}] | Loss: {loss.item()} | Duration: {(time.time() - st):.2f} | {((step_interval * args.batch_size)/(time.time() - st)):.2f} | Throughput: {((step_interval * args.batch_size * args.block_size)/(time.time() - st)):.2f} tokens/sec"
+                    f"[Step {step+(epoch*len(train_dataloader))}/{total_step}] | Loss: {loss.item()} | Duration: {(time.time() - st):.2f} | {((step_interval * args.train_batch_size)/(time.time() - st)):.2f} | Throughput: {((step_interval * args.train_batch_size * args.block_size)/(time.time() - st)):.2f} tokens/sec"
                 )
                 st = time.time()
             if step % args.eval_step == 0:
