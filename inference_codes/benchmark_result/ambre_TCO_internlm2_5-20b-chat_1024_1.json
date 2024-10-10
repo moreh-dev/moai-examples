@@ -1,0 +1,28 @@
+{
+    "date": "20241007-153345",
+    "backend": "openai",
+    "model_id": "/root/poc/pretrained_models/internlm2_5-20b-chat",
+    "best_of": 1,
+    "use_beam_search": false,
+    "num_prompts": 1,
+    "request_rate": "inf",
+    "input_lens": 1024,
+    "output_lens": 200,
+    "duration": 8.117671991698444,
+    "completed": 3,
+    "total_input_tokens": 3072,
+    "total_output_tokens": 600,
+    "average_max_generation_token_per_sec": 24.999938567150767,
+    "maximum_running_request": 1.0,
+    "max_generation_tps": [
+        24.84047459232238,
+        25.079670554564963,
+        25.079670554564963
+    ],
+    "mean_ttft_ms": 228.5065846517682,
+    "median_ttft_ms": 148.0558766052127,
+    "p99_ttft_ms": 413.51411171257496,
+    "ttfts": [
+        0.1480558766052127
+    ]
+}

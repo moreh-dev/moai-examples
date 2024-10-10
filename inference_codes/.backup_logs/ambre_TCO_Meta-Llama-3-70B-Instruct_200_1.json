@@ -1,0 +1,28 @@
+{
+    "date": "20240815-150559",
+    "backend": "openai",
+    "model_id": "/root/poc/pretrained_models/Meta-Llama-3-70B-Instruct",
+    "best_of": 1,
+    "use_beam_search": false,
+    "num_prompts": 1,
+    "request_rate": "inf",
+    "input_lens": 200,
+    "output_lens": 200,
+    "duration": 11.287810527021065,
+    "completed": 3,
+    "total_input_tokens": 600,
+    "total_output_tokens": 600,
+    "average_max_generation_token_per_sec": 17.576132947746302,
+    "maximum_running_request": 1.0,
+    "max_generation_tps": [
+        17.592232128643452,
+        17.592232128643452,
+        17.543934585951998
+    ],
+    "mean_ttft_ms": 144.96550243347883,
+    "median_ttft_ms": 141.53632521629333,
+    "p99_ttft_ms": 163.7194188637659,
+    "ttfts": [
+        0.1641721350606531
+    ]
+}
