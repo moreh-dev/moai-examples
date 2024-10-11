@@ -127,18 +127,19 @@ def save_model_and_tokenizer(args, model, tokenizer):
 def prepare_dataset(args):
     if args.dataset_name_or_path == "bitext/Bitext-customer-support-llm-chatbot-training-dataset":
         dataset = {}
-        dataset["train"] = load_dataset(args.dataset_name_or_path,
-                                        split="train[95%:]")
-        dataset["validation"] = load_dataset(args.dataset_name_or_path,
-                                             split="train[:5%]")
+        dataset["train"] = load_dataset(
+            args.dataset_name_or_path, split="train[95%:]").with_format("torch")
+        dataset["validation"] = load_dataset(
+            args.dataset_name_or_path, split="train[:5%]").with_format("torch")
     elif args.dataset_name_or_path == "agileloop/izaz-sequence-of-actions-prediction-dataset-llama2-7b-32k":
-        dataset = {}
-        dataset["train"] = load_dataset(args.dataset_name_or_path,
-                                        split="train[:1%]")
-        dataset["validation"] = load_dataset(args.dataset_name_or_path,
-                                             split="train[90%:91%]")
+        dataset = load_dataset(args.dataset_name_or_path).with_format("torch")
+        dataset["train"] = load_dataset(
+            args.dataset_name_or_path, split="train[:90%]").with_format("torch")
+        dataset["validation"] = load_dataset(
+            args.dataset_name_or_path,
+            split="train[90%:95%]").with_format("torch")
     else:
-        dataset = load_dataset(args.dataset_name_or_path)
+        dataset = load_dataset(args.dataset_name_or_path).with_format("torch")
 
     return dataset
 
@@ -165,50 +166,38 @@ def preprocess_dataset(args, dataset, tokenizer):
         return result
 
     def preprocess_agileloop(prompt):
-        chat = [
-            {
-                "role": "user",
-                "content": f"{prompt['Instruction']}"
-            },
-            {
-                "role": "assistant",
-                "content": f"{prompt['Response']}"
-            },
-        ]
+        chat = [{
+            "role": "user",
+            "content": f"{prompt['Instruction']}"
+        }, {
+            "role": "assistant",
+            "content": f"{prompt['Response']}"
+        }]
+
         chat = tokenizer.apply_chat_template(chat, tokenize=False)
         result = tokenizer(chat,
                            truncation=True,
                            max_length=args.block_size,
                            padding="max_length")
-        attention_mask = result['attention_mask']
-        cum_sum = [
-            sum(attention_mask[:i + 1]) - 1 for i in range(len(attention_mask))
-        ]
-        position_ids = [
-            1 if m == 0 else p for m, p in zip(attention_mask, cum_sum)
-        ]
-
-        #        position_ids = result['attention_mask'].long().cumsum(-1) - 1
-        #        position_ids.masked_fill_(result['attention_mask'] == 0, 1)
-
-        result['position_ids'] = position_ids
-        result['labels'] = copy.deepcopy(result['input_ids'])
-        return result
+        ret = {}
+        ret['input_ids'] = result['input_ids']
+        ret['attention_mask'] = result['attention_mask']
+        return ret
 
     if args.dataset_name_or_path == "bitext/Bitext-customer-support-llm-chatbot-training-dataset":
         dataset['train'] = dataset['train'].map(preprocess,
-                                                num_proc=1,
+                                                num_proc=8,
                                                 load_from_cache_file=True)
         dataset['validation'] = dataset['validation'].map(
-            preprocess, num_proc=1, load_from_cache_file=True)
+            preprocess, num_proc=8, load_from_cache_file=True)
     elif args.dataset_name_or_path == "agileloop/izaz-sequence-of-actions-prediction-dataset-llama2-7b-32k":
         dataset['train'] = dataset['train'].map(preprocess_agileloop,
-                                                num_proc=1,
+                                                num_proc=8,
                                                 load_from_cache_file=True)
         dataset['validation'] = dataset['validation'].map(
-            preprocess_agileloop, num_proc=1, load_from_cache_file=True)
+            preprocess_agileloop, num_proc=8, load_from_cache_file=True)
     else:
-        dataset = dataset.map(preprocess, num_proc=1, load_from_cache_file=True)
+        dataset = dataset.map(preprocess, num_proc=8, load_from_cache_file=True)
 
     return dataset
 

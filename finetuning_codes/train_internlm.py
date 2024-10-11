@@ -60,6 +60,11 @@ def parse_args():
         default=1000,
     )
     parser.add_argument(
+        "--max-step",
+        type=int,
+        default=-1,
+    )
+    parser.add_argument(
         "--save-path",
         type=str,
         default="./internlm2_5-20b-finetuned",
@@ -97,7 +102,7 @@ def eval(model, eval_dataloader, tokenizer):
         total_correct = torch.tensor([0], device="cuda")
         for e_step, e_batch in enumerate(eval_dataloader, start=1):
             e_input_ids = e_batch['input_ids']
-            e_attn_mask = e_batch['attenion_mask']
+            e_attn_mask = e_batch['attention_mask']
             e_inputs, e_labels = e_input_ids, mask_pads(e_input_ids,
                                                         e_attn_mask)
             e_position_ids = e_attn_mask.long().cumsum(-1) - 1
@@ -121,62 +126,46 @@ def eval(model, eval_dataloader, tokenizer):
 def main(args):
     torch.moreh.option.enable_advanced_parallelization()
     # Load base model and tokenizer
-    print(f"Load {args.model_name_or_path} model checkpoint and tokenizer...")
-    tokenizer = AutoTokenizer.from_pretrained(args.model_name_or_path,
-                                              trust_remote_code=True)
-    config = AutoConfig.from_pretrained(args.model_name_or_path,
-                                        trust_remote_code=True)
-    model = InternLM2ForCausalLM.from_pretrained(args.model_name_or_path,
-                                                 trust_remote_code=True)
-    if args.use_lora:
-        from peft import get_peft_model
-        from peft import LoraConfig
-        config = LoraConfig(
-            lora_alpha=args.lora_alpha,
-            lora_dropout=args.lora_dropout,
-            r=args.lora_r,
-            target_modules=["q_proj", "v_proj"],
-            bias="none",
-            task_type="CAUSAL_LM",
-        )
-        model = get_peft_model(model, config)
-    print_trainable_parameters(model)
+    model, tokenizer = load_model(args)
+
     print(f"Downloading {args.dataset_name_or_path} dataset...")
-    dataset = load_dataset(args.dataset_name_or_path).with_format("torch")
-    if "validation" not in dataset:
-        dataset["train"] = load_dataset(
-            args.dataset_name_or_path, split="train[:90%]").with_format("torch")
-        dataset["validation"] = load_dataset(
-            args.dataset_name_or_path,
-            split="train[90%:95%]").with_format("torch")
+    dataset = prepare_dataset(args)
+    dataset = preprocess_dataset(args, dataset, tokenizer)
 
-    # Construct a formatted prompt
-    def preprocess(prompt):
-        chat = [{
-            "role": "user",
-            "content": f"{prompt['Instruction']}"
-        }, {
-            "role": "assistant",
-            "content": f"{prompt['Response']}"
-        }]
+    #    dataset = load_dataset(args.dataset_name_or_path).with_format("torch")
+    #    if "validation" not in dataset:
+    #        dataset["train"] = load_dataset(
+    #            args.dataset_name_or_path, split="train[:90%]").with_format("torch")
+    #        dataset["validation"] = load_dataset(
+    #            args.dataset_name_or_path,
+    #            split="train[90%:95%]").with_format("torch")
+    #
+    #    # Construct a formatted prompt
+    #    def preprocess(prompt):
+    #        chat = [{
+    #            "role": "user",
+    #            "content": f"{prompt['Instruction']}"
+    #        }, {
+    #            "role": "assistant",
+    #            "content": f"{prompt['Response']}"
+    #        }]
+    #
+    #        chat = tokenizer.apply_chat_template(chat, tokenize=False)
+    #        result = tokenizer(chat,
+    #                           truncation=True,
+    #                           max_length=args.block_size,
+    #                           padding="max_length")
+    #        ret = {}
+    #        ret['input_ids'] = result['input_ids']
+    #        ret['attention_mask'] = result['attention_mask']
+    #        return ret
 
-        chat = tokenizer.apply_chat_template(chat, tokenize=False)
-        result = tokenizer(chat,
-                           truncation=True,
-                           max_length=args.block_size,
-                           padding="max_length")
-        ret = {}
-        ret['input_ids'] = result['input_ids']
-        ret['attention_mask'] = result['attention_mask']
-        return ret
-
+    #    dataset = dataset.map(preprocess, num_proc=8)
     def collator(data):
         return {
             'input_ids': torch.stack([x['input_ids'] for x in data]),
             'attention_mask': torch.stack([x['attention_mask'] for x in data])
         }
-
-    dataset = dataset.map(preprocess, num_proc=8)
 
     # Create a DataLoader for the training set
     # Use collate_fn to ensure that all data samples are of the sample length
@@ -204,14 +193,15 @@ def main(args):
     optim = AdamW(model.parameters(), lr=args.lr)
     # Calculate total training steps
     total_step = len(train_dataloader) * args.epochs
+    current_step = 0
     # Start training
     for epoch in range(args.epochs):
         st = time.time()
-        for step, batch in enumerate(train_dataloader, start=1):
-            start_time = time.perf_counter()
+        for _, batch in enumerate(train_dataloader, start=1):
+            current_step += 1
             input_ids = batch['input_ids']
             attn_mask = batch['attention_mask']
-            inputs, labels = input_ids, mask_pads(input_ids, attn_mask)
+            labels = mask_pads(input_ids, attn_mask)
             position_ids = attn_mask.long().cumsum(-1) - 1
             position_ids.masked_fill_(attn_mask == 0, 1)
             outputs = model(
@@ -226,23 +216,40 @@ def main(args):
             optim.step()
             model.zero_grad(set_to_none=True)
             # Logging
-            if step == 1:
-                loss.item()
+            if args.max_step != -1 and current_step == args.max_step:
+                if current_step % args.log_interval == 0:
+                    if current_step == args.log_interval:
+                        step_interval = args.log_interval - 1
+                    else:
+                        step_interval = args.log_interval
+                    logger.info(
+                        f"[Step {current_step}/{total_step}] | Loss: {loss.item()} | Duration: {(time.time() - st):.2f} | Throughput: {((step_interval * args.train_batch_size * args.block_size)/(time.time() - st)):.2f} tokens/sec"
+                    )
+                else:
+                    step_interval = current_step % args.log_interval
+                    logger.info(
+                        f"[Step {current_step}/{total_step}] | Loss: {loss.item()} | Duration: {(time.time() - st):.2f} | Throughput: {((step_interval * args.train_batch_size * args.block_size)/(time.time() - st)):.2f} tokens/sec"
+                    )
+                eval(model, eval_dataloader, tokenizer)
+                break
+            if current_step == 1:
+                loss_item = loss.item()
+                logger.info("Model load and 1 step done.")
                 logger.info(
-                    f"Model load and warmup done. Duration: {(time.time() - st):.2f}"
+                    f"[Step {current_step/{total_step}}] | Loss: {loss_item} | Duration: {(time.time() - st):.2f}"
                 )
                 st = time.time()
                 continue
-            if step % args.log_interval == 0:
-                if step == args.log_interval:
+            if current_step % args.log_interval == 0:
+                if current_step == args.log_interval:
                     step_interval = args.log_interval - 1
                 else:
                     step_interval = args.log_interval
                 logger.info(
-                    f"[Step {step+(epoch*len(train_dataloader))}/{total_step}] | Loss: {loss.item()} | Duration: {(time.time() - st):.2f} | {((step_interval * args.train_batch_size)/(time.time() - st)):.2f} | Throughput: {((step_interval * args.train_batch_size * args.block_size)/(time.time() - st)):.2f} tokens/sec"
+                    f"[Step {current_step}/{total_step}] | Loss: {loss.item()} | Duration: {(time.time() - st):.2f} | Throughput: {((step_interval * args.train_batch_size * args.block_size)/(time.time() - st)):.2f} tokens/sec"
                 )
                 st = time.time()
-            if step % args.eval_step == 0:
+            if current_step % args.eval_step == 0:
                 # Evaluation
                 eval(model, eval_dataloader, tokenizer)
                 model.train()
@@ -251,7 +258,7 @@ def main(args):
         eval(model, eval_dataloader, tokenizer)
         model.train()
         st = time.time()
-    save_model(args, model, tokenizer)
+    save_model_and_tokenizer(args, model, tokenizer)
 
 
 if __name__ == "__main__":
