@@ -63,6 +63,7 @@ def main(args):
         transformers.utils.logging.set_verbosity_error()
 
     model, tokenizer = load_model(args)
+    model = accelerator.prepare(model)
     dataset = prepare_dataset(args)
     dataset = preprocess_dataset(args, dataset, tokenizer)
 
@@ -93,21 +94,23 @@ def main(args):
     total_train_steps = (len(dataset["train"]) //
                          (world_size * args.train_batch_size)) * args.num_epochs
 
-    trainer = AmbreTrainer(model,
-                           tokenizer=tokenizer,
-                           args=trainer_config,
-                           train_dataset=dataset['train'],
-                           eval_dataset=dataset['validation'],
-                           callbacks=[
-                               TrainCallback(
-                                   batch_size=args.train_batch_size,
-                                   world_size=world_size,
-                                   warm_up_st=warm_up_st,
-                                   total_steps=total_train_steps,
-                               )
-                           ])
+    trainer = SFTTrainer(model,
+                         tokenizer=tokenizer,
+                         args=trainer_config,
+                         train_dataset=dataset['train'],
+                         eval_dataset=dataset['validation'],
+                         callbacks=[
+                             TrainCallback(
+                                 batch_size=args.train_batch_size,
+                                 world_size=world_size,
+                                 warm_up_st=warm_up_st,
+                                 total_steps=total_train_steps,
+                             )
+                         ])
     trainer.train()
-    trainer.save_model()
+    trainer.save_state()
+    unwrapped_model = accelerator.unwrap_model(model)
+    save_model_and_tokenizer(args, unwrapped_model, tokenizer)
 
 
 if __name__ == "__main__":

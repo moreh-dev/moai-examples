@@ -134,9 +134,9 @@ def prepare_dataset(args):
     elif args.dataset_name_or_path == "agileloop/izaz-sequence-of-actions-prediction-dataset-llama2-7b-32k":
         dataset = {}
         dataset["train"] = load_dataset(args.dataset_name_or_path,
-                                        split="train[:5%]")
+                                        split="train[:1%]")
         dataset["validation"] = load_dataset(args.dataset_name_or_path,
-                                             split="train[90%:95%]")
+                                             split="train[90%:91%]")
     else:
         dataset = load_dataset(args.dataset_name_or_path)
 
@@ -180,6 +180,18 @@ def preprocess_dataset(args, dataset, tokenizer):
                            truncation=True,
                            max_length=args.block_size,
                            padding="max_length")
+        attention_mask = result['attention_mask']
+        cum_sum = [
+            sum(attention_mask[:i + 1]) - 1 for i in range(len(attention_mask))
+        ]
+        position_ids = [
+            1 if m == 0 else p for m, p in zip(attention_mask, cum_sum)
+        ]
+
+        #        position_ids = result['attention_mask'].long().cumsum(-1) - 1
+        #        position_ids.masked_fill_(result['attention_mask'] == 0, 1)
+
+        result['position_ids'] = position_ids
         result['labels'] = copy.deepcopy(result['input_ids'])
         return result
 

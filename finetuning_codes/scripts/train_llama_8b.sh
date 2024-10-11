@@ -9,8 +9,8 @@ TRANSFORMERS_VERBOSITY=info accelerate launch \
     --model /nas/team_cx/checkpoints/llama3-8b-instruct/ \
     --dataset bitext/Bitext-customer-support-llm-chatbot-training-dataset \
     --lr 0.0001 \
-    --train-batch-size 32 \
-    --eval-batch-size 32 \
+    --train-batch-size 8 \
+    --eval-batch-size 8 \
     --block-size 1024 \
     --num-epochs 5 \
     --max-steps 20 \
