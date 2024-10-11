@@ -6,17 +6,17 @@ current_time=$(date +"%y%m%d_%H%M%S")
 TRANSFORMERS_VERBOSITY=info accelerate launch \
     --config_file config.yaml \
     train.py \
-    --model /nas/team_cx/checkpoints/internlm2_5-20b-chat-unfused/ \
+    --model /nas/team_cx/checkpoints/llama3-8b-instruct/ \
     --dataset bitext/Bitext-customer-support-llm-chatbot-training-dataset \
-    --lr 0.00005 \
-    --train-batch-size 16 \
-    --eval-batch-size 16 \
-    --block-size 32768 \
-    --num-epochs 1 \
+    --lr 0.0001 \
+    --train-batch-size 8 \
+    --eval-batch-size 8 \
+    --block-size 1024 \
+    --num-epochs 5 \
     --max-steps 20 \
-    --log-interval 1 \
-    --output-dir internlm_finetuned_$current_time \
-    |& tee logs/internlm_$current_time.log
+    --log-interval 20 \
+    --output-dir llama_lora_finetuned_$current_time \
+    |& tee llama_lora_$current_time.log
 
 echo "Start: $START_TIME"
 echo "End: $(TZ="Asia/Seoul" date)"

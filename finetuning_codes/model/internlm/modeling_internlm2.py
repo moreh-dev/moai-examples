@@ -169,18 +169,18 @@ class InternLM2DynamicNTKScalingRotaryEmbedding(InternLM2RotaryEmbedding):
     Credits to the Reddit users /u/bloc97 and /u/emozilla"""
 
     def forward(self, x, position_ids):
-        # difference to the original RoPE: inv_freq is recomputed when the sequence length > original length
-        seq_len = torch.max(position_ids) + 1
-        if seq_len > self.max_position_embeddings:
-            base = self.base * (
-                (self.scaling_factor * seq_len / self.max_position_embeddings) -
-                (self.scaling_factor - 1))**(self.dim / (self.dim - 2))
-            inv_freq = 1.0 / (base**(torch.arange(
-                0, self.dim, 2, dtype=torch.int64).float().to(x.device) /
-                                     self.dim))
-            self.register_buffer(
-                "inv_freq", inv_freq,
-                persistent=False)  # TODO joao: this may break with compilation
+        #        # difference to the original RoPE: inv_freq is recomputed when the sequence length > original length
+        #        seq_len = torch.max(position_ids) + 1
+        #        if seq_len > self.max_position_embeddings:
+        #            base = self.base * (
+        #                (self.scaling_factor * seq_len / self.max_position_embeddings) -
+        #                (self.scaling_factor - 1))**(self.dim / (self.dim - 2))
+        #            inv_freq = 1.0 / (base**(torch.arange(
+        #                0, self.dim, 2, dtype=torch.int64).float().to(x.device) /
+        #                                     self.dim))
+        #            self.register_buffer(
+        #                "inv_freq", inv_freq,
+        #                persistent=False)  # TODO joao: this may break with compilation
 
         cos, sin = super().forward(x, position_ids)
         return cos, sin
@@ -288,13 +288,13 @@ class InternLM2Attention(nn.Module):
             raise ValueError(
                 f"hidden_size must be divisible by num_heads (got `hidden_size`: {self.hidden_size}"
                 f" and `num_heads`: {self.num_heads}).")
-        """
+
         self.wqkv = nn.Linear(
             self.hidden_size,
             (self.num_heads + 2 * self.num_key_value_heads) * self.head_dim,
             bias=config.bias,
         )
-        """
+
         self.q = nn.Linear(self.hidden_size, self.hidden_size, bias=config.bias)
         self.k = nn.Linear(self.hidden_size,
                            self.num_key_value_heads * self.head_dim,
@@ -468,6 +468,14 @@ class InternLM2Attention(nn.Module):
             attn_weights = None
 
         return attn_output, attn_weights, past_key_value
+
+    def add_wqkv_layer(self):
+        self.wqkv = nn.Linear(
+            6144,
+            (48 + 2 * 8) * (6144 // 48),
+            bias=False,
+        )
+        self.wqkv.cuda()
 
 
 class InternLM2FlashAttention2(InternLM2Attention):
@@ -1200,13 +1208,14 @@ class InternLM2Model(InternLM2PreTrainedModel):
         # See more context in https://github.com/huggingface/transformers/pull/29114
 
         if self.config.attn_implementation == "flash_attention_2" or MorehFlashAttention is not None:
-            if attention_mask is not None and 0.0 in attention_mask:
-                return attention_mask
-            return None
+            return attention_mask
+#            if attention_mask is not None and 0.0 in attention_mask:
+#                return attention_mask
+#            return None
 
-        # For SDPA, when possible, we will rely on its `is_causal` argument instead of its `attn_mask` argument, in
-        # order to dispatch on Flash Attention 2. This feature is not compatible with static cache, as SDPA will fail
-        # to infer the attention mask.
+# For SDPA, when possible, we will rely on its `is_causal` argument instead of its `attn_mask` argument, in
+# order to dispatch on Flash Attention 2. This feature is not compatible with static cache, as SDPA will fail
+# to infer the attention mask.
         past_seen_tokens = past_key_values.get_seq_length(
         ) if past_key_values is not None else 0
         using_static_cache = isinstance(past_key_values, StaticCache)

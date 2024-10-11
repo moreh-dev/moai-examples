@@ -1,4 +1,4 @@
-transformers==4.42.3
+transformers==4.45.1
 setuptools==69.5.1
 hydra-core
 peft==0.6.1
@@ -9,3 +9,4 @@ sentencepiece
 openai
 tenacity
 trl
+einops
