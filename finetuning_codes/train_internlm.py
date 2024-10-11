@@ -132,35 +132,6 @@ def main(args):
     dataset = prepare_dataset(args)
     dataset = preprocess_dataset(args, dataset, tokenizer)
 
-    #    dataset = load_dataset(args.dataset_name_or_path).with_format("torch")
-    #    if "validation" not in dataset:
-    #        dataset["train"] = load_dataset(
-    #            args.dataset_name_or_path, split="train[:90%]").with_format("torch")
-    #        dataset["validation"] = load_dataset(
-    #            args.dataset_name_or_path,
-    #            split="train[90%:95%]").with_format("torch")
-    #
-    #    # Construct a formatted prompt
-    #    def preprocess(prompt):
-    #        chat = [{
-    #            "role": "user",
-    #            "content": f"{prompt['Instruction']}"
-    #        }, {
-    #            "role": "assistant",
-    #            "content": f"{prompt['Response']}"
-    #        }]
-    #
-    #        chat = tokenizer.apply_chat_template(chat, tokenize=False)
-    #        result = tokenizer(chat,
-    #                           truncation=True,
-    #                           max_length=args.block_size,
-    #                           padding="max_length")
-    #        ret = {}
-    #        ret['input_ids'] = result['input_ids']
-    #        ret['attention_mask'] = result['attention_mask']
-    #        return ret
-
-    #    dataset = dataset.map(preprocess, num_proc=8)
     def collator(data):
         return {
             'input_ids': torch.stack([x['input_ids'] for x in data]),
@@ -236,7 +207,7 @@ def main(args):
                 loss_item = loss.item()
                 logger.info("Model load and 1 step done.")
                 logger.info(
-                    f"[Step {current_step/{total_step}}] | Loss: {loss_item} | Duration: {(time.time() - st):.2f}"
+                    f"[Step {current_step}/{total_step}] | Loss: {loss_item} | Duration: {(time.time() - st):.2f}"
                 )
                 st = time.time()
                 continue
