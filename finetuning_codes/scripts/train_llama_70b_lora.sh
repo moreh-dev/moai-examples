@@ -6,7 +6,7 @@ current_time=$(date +"%y%m%d_%H%M%S")
 TRANSFORMERS_VERBOSITY=info accelerate launch \
     --config_file config.yaml \
     train.py \
-    --model /nas/team_cx/checkpoints/llama3-70b-instruct/ \
+    --model /root/poc/pretrained_models/llama3-70b-instruct/ \
     --dataset bitext/Bitext-customer-support-llm-chatbot-training-dataset \
     --lr 0.0001 \
     --use-lora \
@@ -16,8 +16,8 @@ TRANSFORMERS_VERBOSITY=info accelerate launch \
     --num-epochs 5 \
     --max-steps 20 \
     --log-interval 20 \
-    --output-dir llama_lora_finetuned_$current_time \
-    |& tee llama_lora_$current_time.log
+    --output-dir /root/poc/checkpoints/llama_lora_finetuned_$current_time \
+    |& tee /root/poc/finetuning_codes/logs/llama_lora_$current_time.log
 
 echo "Start: $START_TIME"
 echo "End: $(TZ="Asia/Seoul" date)"

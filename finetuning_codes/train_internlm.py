@@ -225,10 +225,6 @@ def main(args):
                 eval(model, eval_dataloader, tokenizer)
                 model.train()
                 st = time.time()
-        # Evaluation
-        eval(model, eval_dataloader, tokenizer)
-        model.train()
-        st = time.time()
     save_model_and_tokenizer(args, model, tokenizer)
 
 
