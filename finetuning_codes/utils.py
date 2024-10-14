@@ -79,7 +79,7 @@ def load_model(args):
         from model.internlm.modeling_internlm2 import InternLM2ForCausalLM
         model = InternLM2ForCausalLM.from_pretrained(args.model_name_or_path,
                                                      trust_remote_code=True)
-        #model = convert_qkv_unfused(model)
+        model = convert_qkv_unfused(model)
         print(
             f"[WARNING] InternLM model is testing, the saved model configs are different from original"
         )
@@ -117,6 +117,10 @@ def save_model_and_tokenizer(args, model, tokenizer):
     print(f"Saving model and tokenzier in {args.save_path}")
     config = model.config
     if "internlm" in config.architectures[0].lower():
+        model.save_pretrained(args.save_path)
+        from model.internlm.modeling_internlm2 import InternLM2ForCausalLM
+        model = InternLM2ForCausalLM.from_pretrained(args.save_path,
+                                                     trust_remote_code=True)
         model = convert_qkv_fused(model)
 
     model.save_pretrained(args.save_path)

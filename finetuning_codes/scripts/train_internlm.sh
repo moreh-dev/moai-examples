@@ -8,10 +8,10 @@ python train_internlm.py \
   --train-batch-size 16 \
   --log-interval 5 \
   --block-size 32768 \
-  --model-name-or-path /root/poc_2_finetune//pretrained_models/internlm2_5-20b-chat \
+  --model-name-or-path /root/poc/pretrained_models/internlm2_5-20b-chat \
   --dataset-name-or-path agileloop/izaz-sequence-of-actions-prediction-dataset-llama2-7b-32k \
   --save-path /root/poc/checkpoints/internlm2_5-20b-chat-finetuned \
-  --max-step 20 \
+  --max-step -1 \
   |& tee logs/internlm_finetune_$current_time.log
 
 echo "Start: $START_TIME"
