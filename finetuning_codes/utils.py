@@ -113,21 +113,6 @@ def load_model(args):
     return model, tokenizer
 
 
-def save_model_and_tokenizer(args, model, tokenizer):
-    print(f"Saving model and tokenzier in {args.save_path}")
-    config = model.config
-    if "internlm" in config.architectures[0].lower():
-        model.save_pretrained(args.save_path)
-        from model.internlm.modeling_internlm2 import InternLM2ForCausalLM
-        model = InternLM2ForCausalLM.from_pretrained(args.save_path,
-                                                     trust_remote_code=True)
-        model = convert_qkv_fused(model)
-
-    model.save_pretrained(args.save_path)
-    tokenizer.save_pretrained(args.save_path)
-    print(f"Model and Tokenzier is saved in {args.save_path}")
-
-
 def prepare_dataset(args):
     if args.dataset_name_or_path == "bitext/Bitext-customer-support-llm-chatbot-training-dataset":
         dataset = {}
@@ -368,6 +353,21 @@ def convert_qkv_fused(model):
         del module.k
         del module.v
     return model
+
+
+def save_model_and_tokenizer(args, model, tokenizer):
+    print(f"Saving model and tokenzier in {args.save_path}")
+    config = model.config
+    if "internlm" in config.architectures[0].lower():
+        model.save_pretrained(args.save_path)
+        from model.internlm.modeling_internlm2 import InternLM2ForCausalLM
+        model = InternLM2ForCausalLM.from_pretrained(args.save_path,
+                                                     trust_remote_code=True)
+        model = convert_qkv_fused(model)
+
+    model.save_pretrained(args.save_path)
+    tokenizer.save_pretrained(args.save_path)
+    print(f"Model and Tokenzier is saved in {args.save_path}")
 
 
 def print_perf(tco_perf_dict):
