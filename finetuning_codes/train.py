@@ -47,73 +47,71 @@ def arg_parse():
 
 
 def main(args):
-    #    torch.moreh.option.enable_advanced_parallelization()
-    #
-    #    accelerator = Accelerator()
-    #    world_size = accelerator.num_processes
-    #    logger = get_logger(__name__)
-    #    logger.info(accelerator.state, main_process_only=True)
-    #    logger.warning(accelerator.state, main_process_only=True)
-    #
-    #    if accelerator.is_local_main_process:
-    #        datasets.utils.logging.set_verbosity_warning()
-    #        transformers.utils.logging.set_verbosity_info()
-    #    else:
-    #        datasets.utils.logging.set_verbosity_error()
-    #        transformers.utils.logging.set_verbosity_error()
+    torch.moreh.option.enable_advanced_parallelization()
+
+    accelerator = Accelerator()
+    world_size = accelerator.num_processes
+    logger = get_logger(__name__)
+    logger.info(accelerator.state, main_process_only=True)
+    logger.warning(accelerator.state, main_process_only=True)
+
+    if accelerator.is_local_main_process:
+        datasets.utils.logging.set_verbosity_warning()
+        transformers.utils.logging.set_verbosity_info()
+    else:
+        datasets.utils.logging.set_verbosity_error()
+        transformers.utils.logging.set_verbosity_error()
 
     tokenizer = AutoTokenizer.from_pretrained(args.model_name_or_path,
                                               trust_remote_code=True)
-    dataset = prepare_dataset(args)
+    dataset = load_custom_dataset(args)
     dataset = preprocess_dataset(args, dataset, tokenizer)
 
+    # SFTConfig
+    trainer_config = SFTConfig(
+        num_train_epochs=args.num_epochs,
+        max_steps=args.max_steps,
+        per_device_train_batch_size=args.train_batch_size,
+        per_device_eval_batch_size=args.eval_batch_size,
+        output_dir=args.output_dir,
+        max_seq_length=1024,
+        optim='adamw_torch',
+        lr_scheduler_type="cosine",
+        learning_rate=args.lr,
+        warmup_steps=50,
+        bf16=True,
+        do_eval=True,
+        eval_strategy="epoch",
+        logging_steps=args.log_interval,
+        report_to='none',
+        logging_nan_inf_filter=False,
+        save_strategy="no",
+        max_grad_norm=0,
+    )
 
-#
-#    # SFTConfig
-#    trainer_config = SFTConfig(
-#        num_train_epochs=args.num_epochs,
-#        max_steps=args.max_steps,
-#        per_device_train_batch_size=args.train_batch_size,
-#        per_device_eval_batch_size=args.eval_batch_size,
-#        output_dir=args.output_dir,
-#        max_seq_length=1024,
-#        optim='adamw_torch',
-#        lr_scheduler_type="cosine",
-#        learning_rate=args.lr,
-#        warmup_steps=50,
-#        bf16=True,
-#        do_eval=True,
-#        eval_strategy="epoch",
-#        logging_steps=args.log_interval,
-#        report_to='none',
-#        logging_nan_inf_filter=False,
-#        save_strategy="no",
-#        max_grad_norm=0,
-#    )
-#
-#    warm_up_st = time.time()
-#
-#    total_train_steps = (len(dataset["train"]) //
-#                         (world_size * args.train_batch_size)) * args.num_epochs
-#
-#    trainer = SFTTrainer(model,
-#                         tokenizer=tokenizer,
-#                         args=trainer_config,
-#                         train_dataset=dataset['train'],
-#                         eval_dataset=dataset['validation'],
-#                         callbacks=[
-#                             TrainCallback(
-#                                 batch_size=args.train_batch_size,
-#                                 world_size=world_size,
-#                                 warm_up_st=warm_up_st,
-#                                 total_steps=total_train_steps,
-#                             )
-#                         ])
-#    trainer.train()
-#    trainer.save_state()
-#    unwrapped_model = accelerator.unwrap_model(model)
-#    save_model_and_tokenizer(args, unwrapped_model, tokenizer)
-#
+    warm_up_st = time.time()
+
+    total_train_steps = (len(dataset["train"]) //
+                         (world_size * args.train_batch_size)) * args.num_epochs
+
+    trainer = SFTTrainer(model,
+                         tokenizer=tokenizer,
+                         args=trainer_config,
+                         train_dataset=dataset['train'],
+                         eval_dataset=dataset['validation'],
+                         callbacks=[
+                             TrainCallback(
+                                 batch_size=args.train_batch_size,
+                                 world_size=world_size,
+                                 warm_up_st=warm_up_st,
+                                 total_steps=total_train_steps,
+                             )
+                         ])
+    trainer.train()
+    trainer.save_state()
+    unwrapped_model = accelerator.unwrap_model(model)
+    save_model_and_tokenizer(args, unwrapped_model, tokenizer)
+
 
 if __name__ == "__main__":
     args = arg_parse()

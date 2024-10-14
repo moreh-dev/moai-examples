@@ -93,7 +93,7 @@ def parse_args():
     return args
 
 
-def eval(model, eval_dataloader, tokenizer):
+def eval(args, model, eval_dataloader, tokenizer):
     with torch.no_grad():
         logger.info("[START EPOCH EVAL]")
         model.eval()
@@ -117,6 +117,8 @@ def eval(model, eval_dataloader, tokenizer):
                 use_cache=False,
             )
             eval_loss += e_outputs[0]
+            if args.max_step == e_step:
+                break
         logger.info(f"EVAL STEP: {e_step} / {len(eval_dataloader)}")
         logger.info(
             f"Eval Loss: {eval_loss.item()/len(eval_dataloader)} | ELAPSED EVAL TIME: {(time.time() - ev_st)} sec"
@@ -129,7 +131,7 @@ def main(args):
     model, tokenizer = load_model(args)
 
     print(f"Downloading {args.dataset_name_or_path} dataset...")
-    dataset = prepare_dataset(args)
+    dataset = load_custom_dataset(args)
     dataset = preprocess_dataset(args, dataset, tokenizer)
 
     def collator(data):
@@ -201,7 +203,7 @@ def main(args):
                     logger.info(
                         f"[Step {current_step}/{total_step}] | Loss: {loss.item()} | Duration: {(time.time() - st):.2f} | Throughput: {((step_interval * args.train_batch_size * args.block_size)/(time.time() - st)):.2f} tokens/sec"
                     )
-                eval(model, eval_dataloader, tokenizer)
+                eval(args, model, eval_dataloader, tokenizer)
                 break
             if current_step == 1:
                 loss_item = loss.item()
@@ -222,7 +224,7 @@ def main(args):
                 st = time.time()
             if current_step % args.eval_step == 0:
                 # Evaluation
-                eval(model, eval_dataloader, tokenizer)
+                eval(args, model, eval_dataloader, tokenizer)
                 model.train()
                 st = time.time()
     save_model_and_tokenizer(args, model, tokenizer)
