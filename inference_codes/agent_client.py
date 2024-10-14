@@ -1,11 +1,12 @@
-import httpx
-import sys
-import yaml
-import math
-import time
-import os
 import argparse
+import math
+import os
+import sys
+import time
+
+import httpx
 from loguru import logger
+import yaml
 
 SHARED_CKPT_DIR = "/root/poc/checkpoints"
 SHARED_CODE_DIR = "/root/poc/inference_codes/.ambre"
@@ -137,7 +138,7 @@ def select_ckpt() -> tuple:
                 return True, ""
             elif int(opt) == 2:
                 print("")
-                ckpt_path = input("Chekcpoint path : " + SHARED_CKPT_DIR + "/")
+                ckpt_path = input("Checkpoint path : " + SHARED_CKPT_DIR + "/")
                 print("")
                 return False, SHARED_CKPT_DIR + "/" + ckpt_path
             else:
