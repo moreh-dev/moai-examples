@@ -64,7 +64,7 @@ def main(args):
 
     tokenizer = AutoTokenizer.from_pretrained(args.model_name_or_path,
                                               trust_remote_code=True)
-    dataset = prepare_dataset(args)
+    dataset = load_custom_dataset(args)
     dataset = preprocess_dataset(args, dataset, tokenizer)
 
     # SFTConfig

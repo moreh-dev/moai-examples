@@ -131,7 +131,7 @@ def main(args):
     model, tokenizer = load_model(args)
 
     print(f"Downloading {args.dataset_name_or_path} dataset...")
-    dataset = prepare_dataset(args)
+    dataset = load_custom_dataset(args)
     dataset = preprocess_dataset(args, dataset, tokenizer)
 
     def collator(data):

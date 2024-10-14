@@ -41,15 +41,35 @@ KEY = [
 LORA_KEY = ['lora_alpha', 'lora_dropout', 'lora_r']
 
 
-# Compose pad token mask
 def create_mask(input_ids, tokenizer):
+    """
+    Creates a mask with 1 for non-padding tokens and 0 for padding tokens.
+
+    Args:
+        input_ids (torch.Tensor): Tensor of input token IDs.
+        tokenizer (PreTrainedTokenizer): Tokenizer with `pad_token_id`.
+
+    Returns:
+        torch.Tensor: Mask tensor (1 for valid tokens, 0 for padding).
+    """
+
     pad_token_ids = (tokenizer.pad_token_id if tokenizer.pad_token_id
                      is not None else tokenizer.eos_token_id)
     return (input_ids != pad_token_ids).long()
 
 
-# Mask pad tokens
 def mask_pads(input_ids, attention_mask, ignore_index=-100):
+    """
+    Masks padding tokens in the input by setting them to `ignore_index`.
+
+    Args:
+        input_ids (torch.Tensor): Input token IDs.
+        attention_mask (torch.Tensor): Mask indicating valid tokens (1) and padding (0).
+        ignore_index (int, optional): Value to assign to padding tokens. Defaults to -100.
+
+    Returns:
+        torch.Tensor: Input token IDs with padding tokens replaced by `ignore_index`.
+    """
     idx_mask = attention_mask
     labels = copy.deepcopy(input_ids)
     labels[~idx_mask.bool()] = ignore_index
@@ -57,6 +77,18 @@ def mask_pads(input_ids, attention_mask, ignore_index=-100):
 
 
 def load_model(args):
+    """
+    Loads a pre-trained model and tokenizer based on the model architecture specified in `args`.
+    Optionally, LoRA (Low-Rank Adaptation) can be applied for model fine-tuning if specified
+    in `args`.
+
+    Args:
+        args: Arguments containing the model path, LoRA settings, and other configurations.
+
+    Returns:
+        tuple: Loaded model and tokenizer.
+    """
+
     print(f"Loading {args.model_name_or_path} Tokenizer...")
     set_mem_usage_correction_ratio(args)
     configs = AutoConfig.from_pretrained(args.model_name_or_path,
@@ -80,9 +112,6 @@ def load_model(args):
         model = InternLM2ForCausalLM.from_pretrained(args.model_name_or_path,
                                                      trust_remote_code=True)
         model = convert_qkv_unfused(model)
-        print(
-            f"[WARNING] InternLM model is testing, the saved model configs are different from original"
-        )
         tokenizer = AutoTokenizer.from_pretrained(args.model_name_or_path,
                                                   trust_remote_code=True)
     else:
@@ -113,7 +142,16 @@ def load_model(args):
     return model, tokenizer
 
 
-def prepare_dataset(args):
+def load_custom_dataset(args):
+    """
+    Loads a dataset for training and validation based on the dataset path specified in `args`.
+
+    Args:
+        args: Arguments containing the dataset name or path.
+
+    Returns:
+        DatasetDict: A dictionary containing the loaded dataset with "train" and "validation" splits.
+    """
     if args.dataset_name_or_path == "bitext/Bitext-customer-support-llm-chatbot-training-dataset":
         dataset = {}
         dataset["train"] = load_dataset(
@@ -134,6 +172,20 @@ def prepare_dataset(args):
 
 
 def preprocess_dataset(args, dataset, tokenizer):
+    """
+    Preprocesses a dataset by tokenizing input prompts and applying a chat template for specified datasets.
+
+    Different preprocessing methods are used based on the dataset, including handling the user-assistant chat format.
+    Tokenization includes truncation, padding, and setting labels for training.
+
+    Args:
+        args: Arguments containing dataset configurations and block size for tokenization.
+        dataset: The dataset to preprocess, containing training and validation splits.
+        tokenizer: Tokenizer used for tokenizing the input data.
+
+    Returns:
+        DatasetDict: The preprocessed dataset with tokenized inputs and, optionally, labels.
+    """
 
     def preprocess(prompt):
         chat = [
@@ -191,73 +243,20 @@ def preprocess_dataset(args, dataset, tokenizer):
     return dataset
 
 
-def create_dataloader(args, tokenizer, preprocessor):
-    if 'bitext' in args.dataset_name_or_path.lower(
-    ) and 'csv' in args.dataset_name_or_path.lower():
-        dataset = load_dataset(
-            'csv', data_files=args.dataset_name_or_path).with_format("torch")
-        if "validation" not in dataset:
-            dataset["train"] = load_dataset(
-                'csv',
-                data_files=args.dataset_name_or_path,
-                split="train[:95%]").with_format("torch")
-            dataset["validation"] = load_dataset(
-                'csv',
-                data_files=args.dataset_name_or_path,
-                split="train[95%:]").with_format("torch")
-    else:
-        dataset = load_dataset(args.dataset_name_or_path,
-                               args.dataset_config_name).with_format("torch")
-        if "validation" not in dataset:
-            dataset["train"] = load_dataset(
-                args.dataset_name_or_path,
-                args.dataset_config_name,
-                split="train[:95%]").with_format("torch")
-            dataset["validation"] = load_dataset(
-                args.dataset_name_or_path,
-                args.dataset_config_name,
-                split="train[95%:]").with_format("torch")
-
-    # Tokenize and prepare the input prompt
-    def preprocess(prompt):
-        tokenized = tokenizer(
-            preprocessor(prompt),
-            padding="max_length",
-            truncation=True,
-            max_length=args.block_size,
-        )
-        return {
-            "input_ids": tokenized["input_ids"],
-            "attention_mask": tokenized["attention_mask"],
-        }
-
-    def collator(batch):
-        return {
-            'input_ids': torch.stack([x['input_ids'] for x in batch]),
-            'attention_mask': torch.stack([x['attention_mask'] for x in batch])
-        }
-
-    # Preprocess dataset
-    dataset = dataset.map(preprocess, num_proc=16, load_from_cache_file=True)
-
-    # Create a DataLoader for the training set
-    train_dataloader = torch.utils.data.DataLoader(
-        dataset["train"],
-        batch_size=args.train_batch_size,
-        shuffle=True,
-        drop_last=True,
-        collate_fn=collator)
-
-    # Create a DataLoader for the validation set
-    eval_dataloader = torch.utils.data.DataLoader(
-        dataset["validation"],
-        batch_size=args.eval_batch_size,
-        collate_fn=collator)
-
-    return train_dataloader, eval_dataloader
-
-
 def convert_qkv_unfused(model):
+    """
+    Converts a fused query, key, and value (QKV) weight matrix into separate Q, K, and V weight matrices
+    for a model's attention layers, while ensuring gradients are frozen.
+
+    This function is useful when models are trained with fused QKV matrices, but separated Q, K, and V
+    matrices are needed for fine-tuning or inference.
+
+    Args:
+        model: The model with fused QKV matrices in its attention layers.
+
+    Returns:
+        model: The model with separate Q, K, and V matrices and frozen gradients for those weights.
+    """
     config = model.config
     num_heads = config.num_attention_heads
     num_key_value_heads = config.num_key_value_heads
@@ -309,6 +308,19 @@ def convert_qkv_unfused(model):
 
 
 def convert_qkv_fused(model):
+    """
+    Converts separate query, key, and value (Q, K, V) weight matrices into a fused QKV matrix
+    for a model's attention layers, ensuring gradients are frozen.
+
+    This function is useful for optimizing models that originally use separate Q, K, and V matrices
+    by merging them into a single fused matrix.
+
+    Args:
+        model: The model with separate Q, K, and V matrices in its attention layers.
+
+    Returns:
+        model: The model with fused QKV matrices and frozen gradients for those weights.
+    """
     config = model.config
     num_heads = config.num_attention_heads
     num_key_value_heads = config.num_key_value_heads
@@ -356,7 +368,20 @@ def convert_qkv_fused(model):
 
 
 def save_model_and_tokenizer(args, model, tokenizer):
-    print(f"Saving model and tokenzier in {args.save_path}")
+    """
+    Saves the model and tokenizer to the specified path in `args`.
+
+    For InternLM models, the function also converts separate Q, K, and V matrices into a fused QKV matrix
+    before saving. The function saves both the model and tokenizer to the specified directory.
+
+    Args:
+        args: Arguments containing the save path for the model and tokenizer.
+        model: The model to be saved.
+        tokenizer: The tokenizer to be saved.
+
+    Returns:
+        None
+    """
     config = model.config
     if "internlm" in config.architectures[0].lower():
         model.save_pretrained(args.save_path)
@@ -365,60 +390,22 @@ def save_model_and_tokenizer(args, model, tokenizer):
                                                      trust_remote_code=True)
         model = convert_qkv_fused(model)
 
+    print(f"Saving model and tokenzier in {args.save_path}")
     model.save_pretrained(args.save_path)
     tokenizer.save_pretrained(args.save_path)
     print(f"Model and Tokenzier is saved in {args.save_path}")
 
 
-def print_perf(tco_perf_dict):
-    # Calculate the averages
-    avg_tps = sum(tco_perf_dict["tps"]) / len(
-        tco_perf_dict["tps"]) if tco_perf_dict["tps"] else 0
-    avg_time_per_20_epoch = sum(tco_perf_dict["time_per_20_epoch"]) / len(
-        tco_perf_dict["time_per_20_epoch"]
-    ) if tco_perf_dict["time_per_20_epoch"] else 0
-    avg_time_per_1_step = sum(tco_perf_dict["time_per_20_epoch"]) / (
-        len(tco_perf_dict["time_per_20_epoch"]) * 20 -
-        1) if tco_perf_dict["time_per_20_epoch"] else 0
-    total_estimated_time = avg_time_per_1_step * (
-        tco_perf_dict["total_global_steps"] -
-        1) + tco_perf_dict['warmup_duration'] + tco_perf_dict[
-            'total_epochs'] * tco_perf_dict['eval_duration']
-    train_duration = tco_perf_dict['total_duration'] - tco_perf_dict[
-        'eval_duration'] - tco_perf_dict['warmup_duration']
-    # Print the results in a formatted way
-    print(f"{'Performance Summary':^40}")
-    print("=" * 40)
-    print(f"{'Train Duration:':<30} {train_duration:.2f} seconds")
-    print(
-        f"{'Evaluation Duration:':<30} {tco_perf_dict['eval_duration']:.2f} seconds"
-    )
-    print(
-        f"{'Warmup Duration:':<30} {tco_perf_dict['warmup_duration']:.2f} seconds"
-    )
-    print(
-        f"{'Total Duration:':<30} {tco_perf_dict['total_duration']:.2f} seconds"
-    )
-    print(
-        f"{'Total Estimated Duration :':<30} {str(datetime.timedelta(seconds = total_estimated_time))} for {tco_perf_dict['total_epochs'] } epochs"
-    )
-    print(f"{'Avg TPS:':<30} {avg_tps:.2f} tps")
-    print(f"{'Avg Time per 1 Step:':<30} {avg_time_per_1_step:.2f} seconds")
-    print("=" * 40)
-
-
-def print_config(config):
-    print("Configuration")
-    for key in KEY:
-        print(f"{key} : {getattr(config, key)}")
-    if config.use_lora:
-        for lora_key in LORA_KEY:
-            print(f"{lora_key} : {getattr(config, lora_key)}")
-
-
 def print_trainable_parameters(model):
     """
-    Prints the number of trainable parameters in the model.
+    Prints the number of trainable parameters in the model, along with the total number of parameters
+    and the percentage of trainable parameters.
+
+    Args:
+        model: The model whose parameters are being evaluated.
+
+    Returns:
+        None
     """
     trainable_params = 0
     all_param = 0
@@ -432,30 +419,38 @@ def print_trainable_parameters(model):
 
 
 def typecast_untrainable_params(model):
+    """
+    Converts the data type of untrainable (non-trainable) model parameters to `bfloat16`.
+
+    This can help reduce memory usage for parameters that do not require gradient updates.
+
+    Args:
+        model: The model whose untrainable parameters will be typecast.
+
+    Returns:
+        None
+    """
     for param in model.parameters():
         if not param.requires_grad:
             param.data = param.data.bfloat16()
 
 
 def set_mem_usage_correction_ratio(args):
+    """
+    Sets the memory usage correction ratio for advanced parallelization if the attribute is present in `args`.
+
+    This function adjusts memory management settings to optimize parallelization based on the specified ratio.
+
+    Args:
+        args: Arguments containing the memory usage correction ratio.
+
+    Returns:
+        None
+    """
     if hasattr(args, "memory_usage_correction_ratio"):
         moreh_config.set_config(
             "advanced_parallelization_memory_usage_correction_ratio",
             args.memory_usage_correction_ratio)
-
-
-def doc_to_text(doc):
-    inputs = " ".join(doc["code_tokens"]).replace("\n", " ")
-    inputs = " ".join(inputs.strip().split())
-
-    return inputs
-
-
-def doc_to_target(doc):
-    targets = " ".join(doc["docstring_tokens"]).replace("\n", "")
-    targets = " ".join(targets.strip().split())
-
-    return targets
 
 
 class TrainCallback(TrainerCallback):
