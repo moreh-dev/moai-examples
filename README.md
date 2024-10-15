@@ -4,9 +4,9 @@
 
 <p align="center" style="font-size: 1.2em;">
   <strong>A full-stack infrastructure software from PyTorch to GPUs for the LLM era.</strong><br/>
-  <em>MoAI Platform decouples AI infrastructure from specific hardware vendors.</em><br/>
-  <em>It provides virtualization of all GPU/NPUs in a cluster for higher utilization and failover.</em><br/>
-  <em>The platform can scale to thousands of GPUs/NPUs with automatic parallelization and optimization.</em><br/>
+  <em>Decouple AI infrastructure from specific hardware vendors.</em><br/>
+  <em>Virtualize of all GPU/NPUs in a cluster for higher utilization and failover.</em><br/>
+  <em>Scale to thousands of GPUs/NPUs with automatic parallelization and optimization.</em><br/>
   <em>Supports any multi-billion or multi-trillion parameter model for training, and serving.</em><br/>
 </p>
 
