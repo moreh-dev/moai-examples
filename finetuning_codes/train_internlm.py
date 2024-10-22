@@ -168,8 +168,8 @@ def main(args):
     total_step = len(train_dataloader) * args.epochs
     current_step = 0
     # Start training
+    st = time.time()
     for epoch in range(args.epochs):
-        st = time.time()
         for _, batch in enumerate(train_dataloader, start=1):
             current_step += 1
             input_ids = batch['input_ids']
