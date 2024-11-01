@@ -35,7 +35,7 @@ def arg_parse():
     parser.add_argument("--train-batch-size", type=int, default=32)
     parser.add_argument("--eval-batch-size", type=int, default=32)
     parser.add_argument("--lr", type=float, default=5e-5)
-    parser.add_argument("--output-dir",
+    parser.add_argument("--save-path",
                         type=str,
                         default="/root/poc/checkpoints/llama_lora_finetuned")
     parser.add_argument("--num-epochs", type=int, default=5)
@@ -73,7 +73,7 @@ def main(args):
         max_steps=args.max_steps,
         per_device_train_batch_size=args.train_batch_size,
         per_device_eval_batch_size=args.eval_batch_size,
-        output_dir=args.output_dir,
+        output_dir=args.save_path,
         max_seq_length=1024,
         optim='adamw_torch',
         lr_scheduler_type="cosine",

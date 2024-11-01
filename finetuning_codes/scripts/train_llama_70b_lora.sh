@@ -16,7 +16,7 @@ TRANSFORMERS_VERBOSITY=info accelerate launch \
     --num-epochs 5 \
     --max-steps 20 \
     --log-interval 20 \
-    --output-dir /root/poc/checkpoints/llama_lora_finetuned_$current_time \
+    --save-path /root/poc/checkpoints/llama_lora_finetuned_$current_time \
     |& tee /root/poc/finetuning_codes/logs/llama_lora_$current_time.log
 
 echo "Start: $START_TIME"
