@@ -23,6 +23,9 @@ from utils import *
 def arg_parse():
     parser = argparse.ArgumentParser()
     parser.add_argument("--use-lora", action="store_true")
+    parser.add_argument("--lora-alpha", type=int, default=16)
+    parser.add_argument("--lora-dropout", type=float, default=0.1)
+    parser.add_argument("--lora-r", type=int, default=64)
     parser.add_argument(
         "--model-name-or-path",
         type=str,
@@ -31,7 +34,7 @@ def arg_parse():
         "--dataset-name-or-path",
         type=str,
         default="bitext/Bitext-customer-support-llm-chatbot-training-dataset")
-    parser.add_argument("--block-size", type=int, default=32768)
+    parser.add_argument("--block-size", type=int, default=1024)
     parser.add_argument("--train-batch-size", type=int, default=32)
     parser.add_argument("--eval-batch-size", type=int, default=32)
     parser.add_argument("--lr", type=float, default=5e-5)
@@ -62,8 +65,7 @@ def main(args):
         datasets.utils.logging.set_verbosity_error()
         transformers.utils.logging.set_verbosity_error()
 
-    tokenizer = AutoTokenizer.from_pretrained(args.model_name_or_path,
-                                              trust_remote_code=True)
+    model, tokenizer = load_model(args)
     dataset = load_custom_dataset(args)
     dataset = preprocess_dataset(args, dataset, tokenizer)
 
