@@ -29,6 +29,7 @@ from transformers.trainer_utils import seed_worker
 from transformers.utils import is_datasets_available
 from transformers.utils import is_peft_available
 from trl import SFTTrainer
+from moreh.driver.common import config as moreh_config
 
 DEFAULT_SYSTEM_PROMPT = "You are a helpful assistant."
 
@@ -114,6 +115,9 @@ def load_model(args):
         model = convert_qkv_unfused(model)
         tokenizer = AutoTokenizer.from_pretrained(args.model_name_or_path,
                                                   trust_remote_code=True)
+    elif "qwen" in configs.architectures[0].lower():
+        model = AutoModelForCausalLM.from_pretrained(args.model_name_or_path, trust_remote_code=True, torch_dtype='auto')
+        tokenizer = AutoTokenizer.from_pretrained("Qwen/Qwen-tokenizer", trust_remote_code=True)
     else:
         model = AutoModelForCausalLM.from_pretrained(args.model_name_or_path)
         tokenizer = AutoTokenizer.from_pretrained(args.model_name_or_path)
@@ -205,6 +209,25 @@ def preprocess_dataset(args, dataset, tokenizer):
                            padding="max_length")
         result['labels'] = copy.deepcopy(result['input_ids'])
         return result
+    
+    def preprocess_chatbot(prompt):
+        chat = [
+            {
+                "role": "user",
+                "content": f"{prompt['prompt']}"
+            },
+            {
+                "role": "assistant",
+                "content": f"{prompt['response']}"
+            },
+        ]
+        chat = tokenizer.apply_chat_template(chat, tokenize=False)
+        result = tokenizer(chat,
+                           truncation=True,
+                           max_length=args.block_size,
+                           padding="max_length")
+        result['labels'] = copy.deepcopy(result['input_ids'])
+        return result
 
     def preprocess_agileloop(prompt):
         chat = [{
@@ -237,6 +260,10 @@ def preprocess_dataset(args, dataset, tokenizer):
                                                 load_from_cache_file=True)
         dataset['validation'] = dataset['validation'].map(
             preprocess_agileloop, num_proc=8, load_from_cache_file=True)
+    elif args.dataset_name_or_path == "MBZUAI/LaMini-instruction":
+        dataset = dataset.map(preprocess, num_proc=8, load_from_cache_file=True)
+    elif args.dataset_name_or_path == "alespalla/chatbot_instruction_prompts":
+        dataset = dataset.map(preprocess_chatbot, num_proc=8, load_from_cache_file=True)
     else:
         dataset = dataset.map(preprocess, num_proc=8, load_from_cache_file=True)
 
@@ -390,10 +417,10 @@ def save_model_and_tokenizer(args, model, tokenizer):
                                                      trust_remote_code=True)
         model = convert_qkv_fused(model)
 
-    print(f"Saving model and tokenzier in {args.save_path}")
+    print(f"Saving model and tokenizer in {args.save_path}")
     model.save_pretrained(args.save_path)
     tokenizer.save_pretrained(args.save_path)
-    print(f"Model and Tokenzier is saved in {args.save_path}")
+    print(f"Model and Tokenizer is saved in {args.save_path}")
 
 
 def print_trainable_parameters(model):
