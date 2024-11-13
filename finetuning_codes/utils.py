@@ -128,6 +128,8 @@ def load_model(args):
         from peft import LoraConfig
         if "baichuan" in configs.architectures[0].lower():
             _target_modules = ["W_pack"]
+        elif "qwen" in configs.architectures[0].lower():
+            _target_modules = ["c_proj"]
         else:
             _target_modules = ["q_proj", "v_proj"]
         config = LoraConfig(
@@ -166,6 +168,13 @@ def load_custom_dataset(args):
         dataset = load_dataset(args.dataset_name_or_path).with_format("torch")
         dataset["train"] = load_dataset(
             args.dataset_name_or_path, split="train[:90%]").with_format("torch")
+        dataset["validation"] = load_dataset(
+            args.dataset_name_or_path,
+            split="train[90%:95%]").with_format("torch")
+    elif args.dataset_name_or_path == "alespalla/chatbot_instruction_prompts":
+        dataset = load_dataset(args.dataset_name_or_path).with_format("torch")
+        dataset["train"] = load_dataset(
+            args.dataset_name_or_path, split="train[:5%]").with_format("torch")
         dataset["validation"] = load_dataset(
             args.dataset_name_or_path,
             split="train[90%:95%]").with_format("torch")
@@ -263,7 +272,8 @@ def preprocess_dataset(args, dataset, tokenizer):
     elif args.dataset_name_or_path == "MBZUAI/LaMini-instruction":
         dataset = dataset.map(preprocess, num_proc=8, load_from_cache_file=True)
     elif args.dataset_name_or_path == "alespalla/chatbot_instruction_prompts":
-        dataset = dataset.map(preprocess_chatbot, num_proc=8, load_from_cache_file=True)
+        dataset['train'] = dataset['train'].map(preprocess_chatbot, num_proc=8, load_from_cache_file=True)
+        dataset['validation'] = dataset['validation'].map(preprocess_chatbot, num_proc=8, load_from_cache_file=True)
     else:
         dataset = dataset.map(preprocess, num_proc=8, load_from_cache_file=True)
 
