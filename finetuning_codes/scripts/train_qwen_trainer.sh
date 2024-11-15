@@ -1,8 +1,5 @@
 #!/bin/bash
 
-export HF_HOME="/nas/team_cx/jingee/datasets"
-export MOREH_DUMP_PULL_TENSOR=True
-
 START_TIME=$(TZ="Asia/Seoul" date)
 current_time=$(date +"%y%m%d_%H%M%S")
 
@@ -13,13 +10,13 @@ TRANSFORMERS_VERBOSITY=info accelerate launch \
     --dataset alespalla/chatbot_instruction_prompts \
     --lr 0.0001 \
     --use-lora \
-    --train-batch-size 16 \
-    --eval-batch-size 16 \
+    --train-batch-size 8 \
+    --eval-batch-size 1 \
     --num-epochs 5 \
-    --max-steps 20 \
+    --max-steps 100 \
     --log-interval 2 \
-    --save-path /nas/team_cx/jingee/ambre-models/checkpoints/qwen-finetuned_$current_time \
-    |& tee /nas/team_cx/jingee/ambre-models/finetuning_codes/logs/qwen_finetune_$current_time.log
+    --save-path /root/poc/checkpoints/qwen_finetuned_$current_time \
+    |& tee /root/poc/finetuning_codes/logs/qwen_finetune_$current_time.log
 
 echo "Start: $START_TIME"
 echo "End: $(TZ="Asia/Seoul" date)"
