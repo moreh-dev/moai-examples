@@ -29,6 +29,7 @@ from transformers.trainer_utils import seed_worker
 from transformers.utils import is_datasets_available
 from transformers.utils import is_peft_available
 from trl import SFTTrainer
+
 from moreh.driver.common import config as moreh_config
 
 DEFAULT_SYSTEM_PROMPT = "You are a helpful assistant."
@@ -116,8 +117,11 @@ def load_model(args):
         tokenizer = AutoTokenizer.from_pretrained(args.model_name_or_path,
                                                   trust_remote_code=True)
     elif "qwen" in configs.architectures[0].lower():
-        model = AutoModelForCausalLM.from_pretrained(args.model_name_or_path, trust_remote_code=True, torch_dtype='auto')
-        tokenizer = AutoTokenizer.from_pretrained("Qwen/Qwen-tokenizer", trust_remote_code=True)
+        model = AutoModelForCausalLM.from_pretrained(args.model_name_or_path,
+                                                     trust_remote_code=True,
+                                                     torch_dtype='auto')
+        tokenizer = AutoTokenizer.from_pretrained("Qwen/Qwen-tokenizer",
+                                                  trust_remote_code=True)
     else:
         model = AutoModelForCausalLM.from_pretrained(args.model_name_or_path)
         tokenizer = AutoTokenizer.from_pretrained(args.model_name_or_path)
@@ -173,8 +177,8 @@ def load_custom_dataset(args):
             split="train[90%:95%]").with_format("torch")
     elif args.dataset_name_or_path == "alespalla/chatbot_instruction_prompts":
         dataset = load_dataset(args.dataset_name_or_path).with_format("torch")
-        dataset["train"] = load_dataset(
-            args.dataset_name_or_path, split="train[:5%]").with_format("torch")
+        dataset["train"] = load_dataset(args.dataset_name_or_path,
+                                        split="train[:5%]").with_format("torch")
         dataset["validation"] = load_dataset(
             args.dataset_name_or_path,
             split="train[90%:95%]").with_format("torch")
@@ -218,7 +222,7 @@ def preprocess_dataset(args, dataset, tokenizer):
                            padding="max_length")
         result['labels'] = copy.deepcopy(result['input_ids'])
         return result
-    
+
     def preprocess_chatbot(prompt):
         chat = [
             {
@@ -270,10 +274,13 @@ def preprocess_dataset(args, dataset, tokenizer):
         dataset['validation'] = dataset['validation'].map(
             preprocess_agileloop, num_proc=8, load_from_cache_file=True)
     elif args.dataset_name_or_path == "MBZUAI/LaMini-instruction":
-        dataset = dataset.map(preprocess, num_proc=8, load_from_cache_file=True)
+        dataset = dataset.map(preprocess, num_proc=1, load_from_cache_file=True)
     elif args.dataset_name_or_path == "alespalla/chatbot_instruction_prompts":
-        dataset['train'] = dataset['train'].map(preprocess_chatbot, num_proc=8, load_from_cache_file=True)
-        dataset['validation'] = dataset['validation'].map(preprocess_chatbot, num_proc=8, load_from_cache_file=True)
+        dataset['train'] = dataset['train'].map(preprocess_chatbot,
+                                                num_proc=1,
+                                                load_from_cache_file=True)
+        dataset['validation'] = dataset['validation'].map(
+            preprocess_chatbot, num_proc=1, load_from_cache_file=True)
     else:
         dataset = dataset.map(preprocess, num_proc=8, load_from_cache_file=True)
 
