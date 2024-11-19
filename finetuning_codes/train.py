@@ -89,6 +89,7 @@ def main(args):
         logging_nan_inf_filter=False,
         save_strategy="no",
         max_grad_norm=0,
+        logging_first_step=True,
     )
 
     warm_up_st = time.time()
