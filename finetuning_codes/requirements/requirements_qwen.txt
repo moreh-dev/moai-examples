@@ -1,6 +1,6 @@
 accelerate 
 tiktoken
 scipy 
-transformers_stream_generator==0.0.4 
+transformers_stream_generator
 peft 
 deepspeed
