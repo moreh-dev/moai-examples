@@ -1,0 +1,6 @@
+accelerate 
+tiktoken
+scipy 
+transformers_stream_generator
+peft 
+deepspeed
