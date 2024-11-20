@@ -81,7 +81,6 @@ def main(args):
         lr_scheduler_type="cosine",
         learning_rate=args.lr,
         warmup_steps=50,
-        #bf16=True,
         do_eval=True,
         eval_strategy="epoch",
         logging_steps=args.log_interval,

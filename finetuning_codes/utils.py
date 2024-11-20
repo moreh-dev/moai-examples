@@ -257,8 +257,10 @@ def preprocess_dataset(args, dataset, tokenizer):
                            max_length=args.block_size,
                            padding="max_length")
         ret = {}
+        result['labels'] = copy.deepcopy(result['input_ids'])
         ret['input_ids'] = result['input_ids']
         ret['attention_mask'] = result['attention_mask']
+        ret['position_ids'] = torch.arange(0, len(result['labels']))  
         return ret
 
     if args.dataset_name_or_path == "bitext/Bitext-customer-support-llm-chatbot-training-dataset":
