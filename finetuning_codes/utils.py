@@ -235,6 +235,7 @@ def preprocess_dataset(args, dataset, tokenizer):
             },
         ]
         chat = tokenizer.apply_chat_template(chat, tokenize=False)
+        chat += tokenizer.eos_token
         result = tokenizer(chat,
                            truncation=True,
                            max_length=args.block_size,
