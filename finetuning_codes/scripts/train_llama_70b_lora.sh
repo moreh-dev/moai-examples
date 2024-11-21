@@ -4,8 +4,8 @@ START_TIME=$(TZ="Asia/Seoul" date)
 current_time=$(date +"%y%m%d_%H%M%S")
 
 TRANSFORMERS_VERBOSITY=info accelerate launch \
-    --config_file config.yaml \
-    train.py \
+    --config_file /root/poc/finetuning_codes/config.yaml \
+    /root/poc/finetuning_codes/train.py \
     --model /root/poc/pretrained_models/llama3-70b-instruct/ \
     --dataset bitext/Bitext-customer-support-llm-chatbot-training-dataset \
     --lr 0.0001 \

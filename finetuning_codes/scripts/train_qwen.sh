@@ -9,7 +9,6 @@ TRANSFORMERS_VERBOSITY=info accelerate launch \
     --model /root/poc/pretrained_models/Qwen-14B \
     --dataset alespalla/chatbot_instruction_prompts \
     --lr 0.0001 \
-    --use-lora \
     --train-batch-size 64 \
     --eval-batch-size 1 \
     --num-epochs 5 \
