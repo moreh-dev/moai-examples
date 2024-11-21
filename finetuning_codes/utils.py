@@ -119,7 +119,7 @@ def load_model(args):
     elif "qwen" in configs.architectures[0].lower():
         model = AutoModelForCausalLM.from_pretrained(args.model_name_or_path,
                                                      trust_remote_code=True,
-                                                     torch_dtype='auto')
+                                                     torch_dtype='float32', fp32=True)
         tokenizer = AutoTokenizer.from_pretrained("Qwen/Qwen-tokenizer",
                                                   trust_remote_code=True)
     else:
