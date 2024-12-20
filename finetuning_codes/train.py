@@ -76,7 +76,7 @@ def main(args):
         per_device_train_batch_size=args.train_batch_size,
         per_device_eval_batch_size=args.eval_batch_size,
         output_dir=args.save_path,
-        max_seq_length=1024,
+        max_seq_length=args.block_size,
         optim='adamw_torch',
         lr_scheduler_type="cosine",
         learning_rate=args.lr,
