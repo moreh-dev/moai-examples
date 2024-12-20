@@ -89,6 +89,7 @@ def main(args):
         save_strategy="no",
         max_grad_norm=0,
         logging_first_step=True,
+        dataloader_drop_last=True
     )
 
     warm_up_st = time.time()
