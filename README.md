@@ -18,19 +18,33 @@
 
 ![overview_01](https://github.com/user-attachments/assets/a1d7b9b5-83f6-4844-8f16-fb6a288f54b3)
 
-
-
 ## QuickStart
 
-The **ambre-models** repository is designed to work with a cluster where the MoAI Platform is installed. To test these scripts, please contact us.
+The **moai-examples** repository is designed to work with a cluster where the MoAI Platform is installed. To test these scripts, please contact us.
 
 ### Training
 
-Run the training script to fine-tune the model. For example, to fine-tune the `internlm2_5-20b-chat` model:
+To fine-tune the model, run the training script as follows:
 
 ```
-bash finetuning_codes/scripts/train_internlm.py
+cd moai-examples
+bash finetuning_codes/scripts/train_{model}.sh
 ```
+By specifying one of the models listed under **supported models** in {model}, you can also experiment with other examples.
+
+**CURRENTLY SUPPORTED MODELS:**
+
+- `baichuan`
+- `internlm`
+- `llama_70b_lora`
+- `llama_8b`
+- `qwen`
+
+> For training Qwen, additional environment setup is required using the following command:
+> ```bash
+> pip install -r requirements/requirements_qwen.txt
+> ```
+
 ### Inference
 
 The MoAI Platform also supports deploying inference servers for your model.
@@ -98,18 +112,61 @@ The MoAI Platform also supports deploying inference servers for your model.
     Hello! How can I assist you today?
     ```
 
-## Supported Models
 
-This repository supports any multi-billion or multi-trillion parameter models for training and serving. 
 
-### Currently Supported Models:
+## **Directory and Code Details**
 
-- **Meta-Llama-3-70B-Instruct**
-- **InternLM 2.5-20B Chat**
+### Repo Structure
 
-### Future Models:
+The structure of the entire repository is as follows:
 
-Additional models will be added in future updates. Stay tuned for more!
+```bash
+moai-examples
+├── README.md                 # Project overview and instructions
+├── checkpoints               # Directory to store model checkpoints during finetuning
+├── finetuning_codes          # Code related to model fine-tuning
+├── git-hooks                 # Git hooks directory for code formatting and other pre/post-commit tasks
+├── inference_codes           # Code for running inference with the trained model
+└── pretrained_models         # Pretrained weights obtained from Huggingface
+```
+
+
+
+### `finetuning_codes`
+
+ `finetuning_codes` directory contains train codes, model configs and scripts necessary for fine-tuning.
+
+```bash
+finetuning_codes
+├── config.yaml                   # Config file for accelerate.
+├── model                         # Directory containing model-related files
+├── requirements                  # Folder for additional dependencies or packages required for fine-tuning. 
+├── scripts                       # Directory containing shell scripts for different fine-tuning setups.     
+├── train.py                      # Main Python script for initiating the fine-tuning process.
+├── train_internlm.py             # Fine-tuning code for InternLM training.
+└── utils.py                      # Utility functions for train.py/train_internlm.py
+```
+
+
+
+### `inference_codes`
+
+ `inference_codes` directory contains scripts, utilities, and configs required for running inference tasks, benchmarking, and interacting with the server.
+
+```bash
+inference_codes
+├── agent_client.py              # Contains code for calling server agent.
+├── benchmark_client.py          # Code for benchmarking online servering performance.
+├── benchmark_result             # Directory to store the results of benchmarking tests.
+├── chat.py                      # Code for handling chat-based interactions with the model.
+├── client_utils.py              # Utility functions for agent_client.py.
+├── prompt.txt                   # Text file containing predefined prompts used during inference.
+├── requirements.txt             # Lists the dependencies required to run the inference code.
+└── scripts                      # Directory for additional scripts related to inference tasks.
+```
+
+
+
 ## Learn More
 
 | **Section**       | **Description**                                 |
