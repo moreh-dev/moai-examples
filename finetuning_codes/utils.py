@@ -34,7 +34,7 @@ from moreh.driver.common import config as moreh_config
 
 DEFAULT_SYSTEM_PROMPT = "You are a helpful assistant."
 
-BAICHUAN_CHAT_TEMPLATE = "{% for message in messages %}{% if message['role'] == 'system' %}{{message['content']}}{% endif %}{% if message['role'] == 'user' %}{{'<reserved_106>' + message['content']}}{% endif %}{% if message['role'] == 'assistant' %}{{'<reserved_107>' + message['content']}}{% endif %}{% endfor %}{% if add_generation_prompt %}{{ '<reserved_107>' }}{% endif %}"
+BAICHUAN_CHAT_TEMPLATE = "{% for message in messages %}{% if message['role'] == 'system' %}{{message['content']}}{% endif %}{% if message['role'] == 'user' %}{{'<reserved_102>' + message['content']}}{% endif %}{% if message['role'] == 'assistant' %}{{'<reserved_103>' + message['content']}}{% endif %}{% endfor %}{% if add_generation_prompt %}{{ '<reserved_107>' }}{% endif %}"
 
 KEY = [
     'model_name_or_path', 'dataset_name_or_path', 'epochs', 'train_batch_size',
@@ -100,6 +100,7 @@ def load_model(args):
         model = BaichuanForCausalLM.from_pretrained(args.model_name_or_path)
         tokenizer = AutoTokenizer.from_pretrained(args.model_name_or_path,
                                                   trust_remote_code=True)
+        tokenizer.chat_template = BAICHUAN_CHAT_TEMPLATE
     elif "llama" in configs.architectures[0].lower():
         from model.llama.modeling_llama import LlamaForCausalLM
         model = LlamaForCausalLM.from_pretrained(args.model_name_or_path)
