@@ -261,7 +261,8 @@ def preprocess_dataset(args, dataset, tokenizer):
                 "role": "assistant",
                 "content": f"{prompt['Response']}"
             }]
-
+        else:
+            chat = f"##INSTRUCTION {prompt['Instruction']}\n\n##RESPONSE {prompt['Response']}"
         chat = tokenizer.apply_chat_template(chat, tokenize=False)
         result = tokenizer(chat,
                            truncation=True,
