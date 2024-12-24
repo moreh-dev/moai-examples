@@ -178,7 +178,7 @@ def load_custom_dataset(args):
     elif args.dataset_name_or_path == "alespalla/chatbot_instruction_prompts":
         dataset = load_dataset(args.dataset_name_or_path).with_format("torch")
         dataset["train"] = load_dataset(args.dataset_name_or_path,
-                                        split="train[:5%]").with_format("torch")
+                                        split="train[:90%]").with_format("torch")
         dataset["validation"] = load_dataset(
             args.dataset_name_or_path,
             split="train[90%:95%]").with_format("torch")
@@ -293,10 +293,7 @@ def preprocess_dataset(args, dataset, tokenizer):
 def convert_qkv_unfused(model):
     """
     Converts a fused query, key, and value (QKV) weight matrix into separate Q, K, and V weight matrices
-    for a model's attention layers, while ensuring gradients are frozen.
-
-    This function is useful when models are trained with fused QKV matrices, but separated Q, K, and V
-    matrices are needed for fine-tuning or inference.
+    for a model's attention layers.
 
     Args:
         model: The model with fused QKV matrices in its attention layers.
@@ -357,7 +354,7 @@ def convert_qkv_unfused(model):
 def convert_qkv_fused(model):
     """
     Converts separate query, key, and value (Q, K, V) weight matrices into a fused QKV matrix
-    for a model's attention layers, ensuring gradients are frozen.
+    for a model's attention layers.
 
     This function is useful for optimizing models that originally use separate Q, K, and V matrices
     by merging them into a single fused matrix.
