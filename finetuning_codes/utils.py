@@ -34,7 +34,7 @@ from moreh.driver.common import config as moreh_config
 
 DEFAULT_SYSTEM_PROMPT = "You are a helpful assistant."
 
-BAICHUAN_CHAT_TEMPLATE = "{% for message in messages %}{% if message['role'] == 'system' %}{{message['content']}}{% endif %}{% if message['role'] == 'user' %}{{'<reserved_106>' + message['content']}}{% endif %}{% if message['role'] == 'assistant' %}{{'<reserved_107>' + message['content']}}{% endif %}{% endfor %}{% if add_generation_prompt %}{{ '<reserved_107>' }}{% endif %}"
+BAICHUAN_CHAT_TEMPLATE = "{% for message in messages %}{% if message['role'] == 'system' %}{{message['content']}}{% endif %}{% if message['role'] == 'user' %}{{'<reserved_102>' + message['content']}}{% endif %}{% if message['role'] == 'assistant' %}{{'<reserved_103>' + message['content']}}{% endif %}{% endfor %}{% if add_generation_prompt %}{{ '<reserved_107>' }}{% endif %}"
 
 KEY = [
     'model_name_or_path', 'dataset_name_or_path', 'epochs', 'train_batch_size',
@@ -96,17 +96,18 @@ def load_model(args):
     configs = AutoConfig.from_pretrained(args.model_name_or_path,
                                          trust_remote_code=True)
     if "baichuan" in configs.architectures[0].lower():
-        from model.modeling_baichuan import BaichuanForCausalLM
+        from model.baichuan.modeling_baichuan import BaichuanForCausalLM
         model = BaichuanForCausalLM.from_pretrained(args.model_name_or_path)
         tokenizer = AutoTokenizer.from_pretrained(args.model_name_or_path,
                                                   trust_remote_code=True)
+        tokenizer.chat_template = BAICHUAN_CHAT_TEMPLATE
     elif "llama" in configs.architectures[0].lower():
         from model.llama.modeling_llama import LlamaForCausalLM
         model = LlamaForCausalLM.from_pretrained(args.model_name_or_path)
         tokenizer = AutoTokenizer.from_pretrained(args.model_name_or_path,
                                                   trust_remote_code=True)
     elif "qwen2" in configs.architectures[0].lower():
-        from model.modeling_qwen2 import Qwen2ForCausalLM
+        from model.qwen2.modeling_qwen2 import Qwen2ForCausalLM
         model = Qwen2ForCausalLM.from_pretrained(args.model_name_or_path)
         tokenizer = AutoTokenizer.from_pretrained(args.model_name_or_path)
     elif "internlm" in configs.architectures[0].lower():
@@ -123,7 +124,7 @@ def load_model(args):
         tokenizer = AutoTokenizer.from_pretrained("Qwen/Qwen-tokenizer",
                                                   trust_remote_code=True)
     else:
-        model = AutoModelForCausalLM.from_pretrained(args.model_name_or_path)
+        model = AutoModelForCausalLM.from_pretrained(args.model_name_or_path, use_cache = False)
         tokenizer = AutoTokenizer.from_pretrained(args.model_name_or_path)
     if not tokenizer.pad_token:
         tokenizer.pad_token_id = tokenizer.eos_token_id
@@ -205,53 +206,63 @@ def preprocess_dataset(args, dataset, tokenizer):
     """
 
     def preprocess(prompt):
-        chat = [
-            {
-                "role": "user",
-                "content": f"{prompt['instruction']}"
-            },
-            {
-                "role": "assistant",
-                "content": f"{prompt['response']}"
-            },
-        ]
-        chat = tokenizer.apply_chat_template(chat, tokenize=False)
+        if tokenizer.chat_template is not None:
+            chat = [
+                {
+                    "role": "user",
+                    "content": f"{prompt['instruction']}"
+                },
+                {
+                    "role": "assistant",
+                    "content": f"{prompt['response']}"
+                },
+            ]
+            chat = tokenizer.apply_chat_template(chat, tokenize=False)
+        else:
+            chat = f"##INSTRUCTION {prompt['instruction']}\n\n##RESPONSE {prompt['response']}"
         result = tokenizer(chat,
                            truncation=True,
                            max_length=args.block_size,
                            padding="max_length")
         result['labels'] = copy.deepcopy(result['input_ids'])
+        result['position_ids'] = torch.arange(0, len(result['labels']))
         return result
 
     def preprocess_chatbot(prompt):
-        chat = [
-            {
-                "role": "user",
-                "content": f"{prompt['prompt']}"
-            },
-            {
-                "role": "assistant",
-                "content": f"{prompt['response']}"
-            },
-        ]
-        chat = tokenizer.apply_chat_template(chat, tokenize=False)
+        if tokenizer.chat_template is not None:
+            chat = [
+                {
+                    "role": "user",
+                    "content": f"{prompt['prompt']}"
+                },
+                {
+                    "role": "assistant",
+                    "content": f"{prompt['response']}"
+                },
+            ]
+            chat = tokenizer.apply_chat_template(chat, tokenize=False)
+        else:
+            chat = f"##INSTRUCTION {prompt['instruction']}\n\n##RESPONSE {prompt['response']}"
         chat += tokenizer.eos_token
         result = tokenizer(chat,
                            truncation=True,
                            max_length=args.block_size,
                            padding="max_length")
         result['labels'] = copy.deepcopy(result['input_ids'])
+        result['position_ids'] = torch.arange(0, len(result['labels']))
         return result
 
     def preprocess_agileloop(prompt):
-        chat = [{
-            "role": "user",
-            "content": f"{prompt['Instruction']}"
-        }, {
-            "role": "assistant",
-            "content": f"{prompt['Response']}"
-        }]
-
+        if tokenizer.chat_template is not None:
+            chat = [{
+                "role": "user",
+                "content": f"{prompt['Instruction']}"
+            }, {
+                "role": "assistant",
+                "content": f"{prompt['Response']}"
+            }]
+        else:
+            chat = f"##INSTRUCTION {prompt['Instruction']}\n\n##RESPONSE {prompt['Response']}"
         chat = tokenizer.apply_chat_template(chat, tokenize=False)
         result = tokenizer(chat,
                            truncation=True,
