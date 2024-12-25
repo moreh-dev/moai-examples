@@ -45,6 +45,22 @@ By specifying one of the models listed under **supported models** in {model}, yo
 > pip install -r requirements/requirements_qwen.txt
 > ```
 
+Recommended Specifications
+
+The optimized versions of MAF, Torch, and Flavor for each model are as follows:
+
+|      model       | MAF Version | Torch Version |      Flavor      |
+| :--------------: | :---------: | :-----------: | :--------------: |
+|    `baichuan`    |  `24.11.0`  |   `1.13.1`    | `2xLarge.1024GB` |
+|      `qwen`      |  `24.11.0`  |   `1.13.1`    |  `xLarge.512GB`  |
+|    `internlm`    | `24.9.212`  |   `1.13.1`    |  `xLarge.512GB`  |
+|    `llama_8b`    |  `24.11.0`  |   `1.13.1`    | `2xLarge.1024GB` |
+|   `llama_70b`    |  `24.11.0`  |   `1.13.1`    | `4xLarge.2048GB` |
+| `llama_70b_lora` |  `24.11.0`  |   `1.13.1`    | `4xLarge.2048GB` |
+
+The detailed fine-tuning parameters are included in the script.
+
+
 ### Inference
 
 The MoAI Platform also supports deploying inference servers for your model.
