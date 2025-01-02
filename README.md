@@ -45,18 +45,53 @@ By specifying one of the models listed under **supported models** in {model}, yo
 > pip install -r requirements/requirements_qwen.txt
 > ```
 
-Recommended Specifications
+The scripts are as follows:
+
+```bash
+#!/bin/bash
+
+# example of train_qwen.sh
+
+START_TIME=$(TZ="Asia/Seoul" date)
+current_time=$(date +"%y%m%d_%H%M%S")
+
+TRANSFORMERS_VERBOSITY=info accelerate launch \
+    --config_file $CONFIG_PATH \
+    train.py \
+    --model Qwen/Qwen-14B \
+    --dataset alespalla/chatbot_instruction_prompts \
+    --lr 0.0001 \
+    --train-batch-size 64 \
+    --eval-batch-size 32 \
+    --num-epochs 5 \
+    --max-steps 20 \
+    --log-interval 20 \
+    --save-path $SAVE_DIR \
+    |& tee $LOG_DIR
+
+echo "Start: $START_TIME"
+echo "End: $(TZ="Asia/Seoul" date)"
+```
+
+The above script is based on execution from the `moai-examples/finetuning_codes` directory. 
+If modifications are required, please adjust it to fit the client or platform specifications. 
+
+Additionally, paths such as `CONFIG_PATH` , `SAVE_DIR` and `LOG_DIR` should be updated to match the context of the container in use.
+
+
+
+**Recommended Specifications**
 
 The optimized versions of MAF, Torch, and Flavor for each model are as follows:
 
-|      model       | MAF Version | Torch Version |      Flavor      |
-| :--------------: | :---------: | :-----------: | :--------------: |
-|    `baichuan`    |  `24.11.0`  |   `1.13.1`    | `2xLarge.1024GB` |
-|      `qwen`      |  `24.11.0`  |   `1.13.1`    |  `xLarge.512GB`  |
-|    `internlm`    | `24.9.212`  |   `1.13.1`    |  `xLarge.512GB`  |
-|    `llama_8b`    |  `24.11.0`  |   `1.13.1`    | `2xLarge.1024GB` |
-|   `llama_70b`    |  `24.11.0`  |   `1.13.1`    | `4xLarge.2048GB` |
-| `llama_70b_lora` |  `24.11.0`  |   `1.13.1`    | `4xLarge.2048GB` |
+|      model       | MAF Version | Torch Version |      Flavor      | Train Batch | Eval Batch |
+| :--------------: | :---------: | :-----------: | :--------------: | :---------: | :--------: |
+|    `baichuan`    |  `24.11.0`  |   `1.13.1`    | `2xLarge.1024GB` |     64      |     32     |
+|      `qwen`      |  `24.11.0`  |   `1.13.1`    |  `xLarge.512GB`  |     64      |     32     |
+|    `internlm`    | `24.9.212`  |   `1.13.1`    |  `xLarge.512GB`  |     64      |     32     |
+|    `llama_8b`    |  `24.11.0`  |   `1.13.1`    | `2xLarge.1024GB` |     64      |     32     |
+|   `llama_70b`    |  `24.11.0`  |   `1.13.1`    | `4xLarge.2048GB` |     256     |     64     |
+| `llama_70b_lora` |  `24.11.0`  |   `1.13.1`    | `4xLarge.2048GB` |     256     |     64     |
 
 The detailed fine-tuning parameters are included in the script.
 
