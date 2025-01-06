@@ -106,10 +106,6 @@ def load_model(args):
         model = LlamaForCausalLM.from_pretrained(args.model_name_or_path)
         tokenizer = AutoTokenizer.from_pretrained(args.model_name_or_path,
                                                   trust_remote_code=True)
-    elif "qwen2" in configs.architectures[0].lower():
-        from model.qwen2.modeling_qwen2 import Qwen2ForCausalLM
-        model = Qwen2ForCausalLM.from_pretrained(args.model_name_or_path)
-        tokenizer = AutoTokenizer.from_pretrained(args.model_name_or_path)
     elif "internlm" in configs.architectures[0].lower():
         from model.internlm.modeling_internlm2 import InternLM2ForCausalLM
         model = InternLM2ForCausalLM.from_pretrained(args.model_name_or_path,
@@ -117,7 +113,7 @@ def load_model(args):
         model = convert_qkv_unfused(model)
         tokenizer = AutoTokenizer.from_pretrained(args.model_name_or_path,
                                                   trust_remote_code=True)
-    elif "qwen" in configs.architectures[0].lower():
+    elif "qwen" in configs.architectures[0].lower() and "qwen2" not in configs.architectures[0].lower():
         model = AutoModelForCausalLM.from_pretrained(args.model_name_or_path,
                                                      trust_remote_code=True,
                                                      torch_dtype='float32', fp32=True)
@@ -449,6 +445,7 @@ def save_model_and_tokenizer(args, model, tokenizer):
         model = convert_qkv_fused(model)
 
     print(f"Saving model and tokenizer in {args.save_path}")
+    model = model.to("cpu")
     model.save_pretrained(args.save_path)
     tokenizer.save_pretrained(args.save_path)
     print(f"Model and Tokenizer is saved in {args.save_path}")
