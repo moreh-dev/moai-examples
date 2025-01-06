@@ -86,7 +86,7 @@ The optimized versions of MAF, Torch, and Flavor for each model are as follows:
 
 |      model       | MAF Version | Torch Version |      Flavor      | Train Batch | Eval Batch |
 | :--------------: | :---------: | :-----------: | :--------------: | :---------: | :--------: |
-|    `baichuan`    |  `24.11.0`  |   `1.13.1`    | `2xLarge.1024GB` |     64      |     32     |
+|    `baichuan`    |  `24.11.0`  |   `1.13.1`    | `4xLarge.1024GB` |     256     |     64     |
 |      `qwen`      |  `24.11.0`  |   `1.13.1`    |  `xLarge.512GB`  |     64      |     32     |
 |    `internlm`    | `24.9.212`  |   `1.13.1`    |  `xLarge.512GB`  |     64      |     32     |
 |    `llama_8b`    |  `24.11.0`  |   `1.13.1`    | `2xLarge.1024GB` |     64      |     32     |
