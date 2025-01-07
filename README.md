@@ -20,7 +20,8 @@
 
 ## QuickStart
 
-The **moai-examples** repository is designed to work with a cluster where the MoAI Platform is installed. To test these scripts, please contact us.
+The **moai-examples** repository is designed to work with a cluster where the MoAI Platform is installed.  
+To test these scripts, please contact us.
 
 ### Pytorch Installation & MoAI Accelerator
 
@@ -59,8 +60,7 @@ The optimized versions of MAF, Torch, and Flavor for each model are as follows:
 
 </div>
 
-The detailed fine-tuning parameters are included in the script.
-
+<br>
 To fine-tune the model, run the training script as follows:
 
 ```bash
@@ -73,6 +73,7 @@ bash scripts/train_{model}.sh
 > pip install -r requirements/requirements_qwen.txt
 > ```
 
+<br>
 By specifying one of the models listed under **example model names** in {model}, you can also experiment with other examples.
 
 <div align="center">
@@ -87,6 +88,7 @@ By specifying one of the models listed under **example model names** in {model},
 
 </div>
 
+<br>
 The scripts are as follows:
 
 ```bash
@@ -114,9 +116,8 @@ echo "Start: $START_TIME"
 echo "End: $(TZ="Asia/Seoul" date)"
 ```
 
-The above script is based on execution from the `moai-examples/finetuning_codes` directory. 
-If modifications are required, please adjust it to fit the client or platform specifications. 
-
+The above script is based on execution from the `moai-examples/finetuning_codes` directory.  
+If modifications are required, please adjust it to fit the client or platform specifications.   
 Additionally, paths such as `CONFIG_PATH` , `SAVE_DIR` and `LOG_DIR` should be updated to match the context of the container in use.
 
 
