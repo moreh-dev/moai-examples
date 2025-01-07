@@ -75,9 +75,7 @@ bash scripts/train_{model}.sh
 
 <br>
 By specifying one of the models listed under **example model names** in {model}, you can also run other examples.
-
-<br>
-<div align="center">
+<div align="center" style="margin-top: 1rem;">
 
 | **LIST OF EXAMPLE MODELS**|
 | :-----------------------: |
