@@ -35,10 +35,10 @@ By specifying one of the models listed under **supported models** in {model}, yo
 **CURRENTLY SUPPORTED MODELS:**
 
 - `baichuan`
+- `qwen_14b`
+- `qwen_72b`
 - `internlm`
-- `llama_70b_lora`
 - `llama_8b`
-- `qwen`
 
 > For training Qwen, additional environment setup is required using the following command:
 > ```bash
@@ -62,9 +62,9 @@ TRANSFORMERS_VERBOSITY=info accelerate launch \
     --dataset alespalla/chatbot_instruction_prompts \
     --lr 0.0001 \
     --train-batch-size 64 \
-    --eval-batch-size 32 \
+    --eval-batch-size 16 \
     --num-epochs 5 \
-    --max-steps 20 \
+    --max-steps -1 \
     --log-interval 20 \
     --save-path $SAVE_DIR \
     |& tee $LOG_DIR
@@ -86,12 +86,11 @@ The optimized versions of MAF, Torch, and Flavor for each model are as follows:
 
 |      model       | MAF Version | Torch Version |      Flavor      | Train Batch | Eval Batch |
 | :--------------: | :---------: | :-----------: | :--------------: | :---------: | :--------: |
-|    `baichuan`    |  `24.11.0`  |   `1.13.1`    | `4xLarge.1024GB` |     256     |     64     |
-|      `qwen`      |  `24.11.0`  |   `1.13.1`    |  `xLarge.512GB`  |     64      |     32     |
-|    `internlm`    | `24.9.212`  |   `1.13.1`    |  `xLarge.512GB`  |     64      |     32     |
-|    `llama_8b`    |  `24.11.0`  |   `1.13.1`    | `2xLarge.1024GB` |     64      |     32     |
-|   `llama_70b`    |  `24.11.0`  |   `1.13.1`    | `4xLarge.2048GB` |     256     |     64     |
-| `llama_70b_lora` |  `24.11.0`  |   `1.13.1`    | `4xLarge.2048GB` |     256     |     64     |
+|    `baichuan`    |  `24.9.211` |   `1.13.1`    | `4xLarge.2048GB` |     64      |     16     |
+|    `qwen_14b`    |  `24.9.211` |   `1.13.1`    |  `xLarge.512GB`  |     64      |     16     |
+|    `qwen_72b`    |  `24.9.211` |   `1.13.1`    | `4xLarge.2048GB` |     256     |     8      |
+|    `internlm`    |  `24.9.212` |   `1.13.1`    | `2xLarge.1024GB` |     64      |     16     |
+|    `llama_8b`    |  `24.9.211` |   `1.13.1`    |  `xLarge.512GB`  |     64      |     16     |
 
 The detailed fine-tuning parameters are included in the script.
 
