@@ -47,6 +47,8 @@ If they are set differently, please refer to the following links to adjust the t
 
 The optimized versions of MAF, Torch, and Flavor for each model are as follows:
 
+<div align="center">
+
 |      model       | MAF Version | Torch Version |      Flavor      | Train Batch | Eval Batch |
 | :--------------: | :---------: | :-----------: | :--------------: | :---------: | :--------: |
 |    `qwen_14b`    |  `24.9.211` |   `1.13.1`    |  `xLarge.512GB`  |     64      |     8      |
@@ -54,6 +56,8 @@ The optimized versions of MAF, Torch, and Flavor for each model are as follows:
 |    `baichuan`    |  `24.9.211` |   `1.13.1`    |  `xLarge.512GB`  |     64      |     8      |
 |    `internlm`    |  `24.9.212` |   `1.13.1`    | `2xLarge.1024GB` |     64      |     16     |
 |    `llama_8b`    |  `24.9.211` |   `1.13.1`    |  `xLarge.512GB`  |     64      |     8      |
+
+</div>
 
 The detailed fine-tuning parameters are included in the script.
 
@@ -71,6 +75,7 @@ bash scripts/train_{model}.sh
 
 By specifying one of the models listed under **example model names** in {model}, you can also experiment with other examples.
 
+<div align="center">
 
 | **LIST OF EXAMPLE MODELS**|
 | :-----------------------: |
@@ -79,6 +84,8 @@ By specifying one of the models listed under **example model names** in {model},
 |         `baichuan`        |
 |         `internlm`        |
 |         `llama_8b`        |
+
+</div>
 
 The scripts are as follows:
 
