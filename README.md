@@ -22,34 +22,9 @@
 
 The **moai-examples** repository is designed to work with a cluster where the MoAI Platform is installed. To test these scripts, please contact us.
 
-### Checking Pytorch Installation
-After connecting to the container via SSH, run the following command to check if PyTorch is installed in the current conda environment:
+### Pytorch Installation & MoAI Accelerator
 
-```bash
-conda list torch
-...
-# Name                    Version                   Build  Channel
-torch                     1.13.1+cu116.moreh24.9.211          pypi_0    pypi
-...
-```
-The version name includes both the PyTorch version and the MoAI version required to run it.
-In the example above, it indicates that PyTorch `1.13.1+cu116` is installed with MoAI version `24.9.211`.
-
-If the moreh version is not `24.9.211` but a different version, please execute the following code.
-
-```bash
-$ update-moreh --target 24.9.211 --torch 1.13.1
-Currently installed: 24.8.0
-Possible upgrading version: 24.9.211
-  
-Do you want to upgrade? (y/n, default:n)
-y
-```
-You can follow the same procedure when installing a different version.
-
-### Setting MoAI Accelerator
-
-Use `moreh-smi` to check the current flavor. If the torch installation was successful, you should see the following output:
+You can check the current moai version and flavor through `moreh-smi`.
 ```bash
 moreh-smi
 
@@ -61,87 +36,48 @@ moreh-smi
 |  * 0     |  Ambre AI Accelerator  |  micro  |  -             |  -             |  -            |
 +-----------------------------------------------------------------------------------------------+
 ```
-If the current version is displayed differently, please repeat the steps in the Checking PyTorch Installation section.
-
-The current MoAI Accelerator in use is `micro`.
-
-You can utilize the `moreh-switch-model` command to review the available accelerator flavors on the current system. For seamless model training, consider using the moreh-switch-modelcommand to switch to a MoAI Accelerator with larger memory capacity.
-
-```bash
-moreh-switch-model
-Current Ambre AI Accelerator: micro
-
-1. micro  *
-2. small
-3. large
-4. xlarge
-5. 2xlarge
-6. 3xlarge
-7. 4xlarge
-8. 8xlarge
-
-Selection (1-8, q, Q):
-```
-
-You can enter the number to switch to a different flavor.
-
-As an example, we will train `qwen_14b`. For this, let’s select the `xlarge`-sized MoAI Accelerator.  
-Enter 4 to use `xlarge`
-
-```bash
-Selection (1-8, q, Q): 4
-The Ambre AI Accelerator model is successfully switched to  "xlarge".
-
-1. micro
-2. small
-3. large
-4. xlarge  *
-5. 2xlarge
-6. 3xlarge
-7. 4xlarge
-8. 8xlarge
-
-Selection (1-8, q, Q):
-```
-Enter `q` to complete the change.
-
-To confirm that the changes have been successfully applied, use the moreh-smi command again to check the currently used MoAI Accelerator.
-```bash
-moreh-smi
-
-+------------------------------------------------------------------------------------------------+
-|                                           Current Version: 24.9.211  Latest Version: 25.1.201  |
-+------------------------------------------------------------------------------------------------+
-|  Device  |          Name          |   Model  |  Memory Usage  |  Total Memory  |  Utilization  |
-+================================================================================================+
-|  * 0     |  Ambre AI Accelerator  |  xlarge  |  -             |  -             |  -            |
-+------------------------------------------------------------------------------------------------+
-```
+If they are set differently, please refer to the following links to adjust the torch version and flavor accordingly:
+- [How to check pytorch installation on MoAI Platform](https://docs.moreh.io/tutorials/llama3_8b_tutorial/1_prepare_fine-tuning/#checking-pytorch-installation)
+- [How to set MoAI accelerator flavor](https://docs.moreh.io/tutorials/llama3_8b_tutorial/1_prepare_fine-tuning/#checking-pytorch-installation)
 
 
 ### Training
 
+**Recommended Specifications**
+
+The optimized versions of MAF, Torch, and Flavor for each model are as follows:
+
+|      model       | MAF Version | Torch Version |      Flavor      | Train Batch | Eval Batch |
+| :--------------: | :---------: | :-----------: | :--------------: | :---------: | :--------: |
+|    `qwen_14b`    |  `24.9.211` |   `1.13.1`    |  `xLarge.512GB`  |     64      |     8      |
+|    `qwen_72b`    |  `24.9.211` |   `1.13.1`    | `4xLarge.2048GB` |     256     |     8      |
+|    `baichuan`    |  `24.9.211` |   `1.13.1`    |  `xLarge.512GB`  |     64      |     8      |
+|    `internlm`    |  `24.9.212` |   `1.13.1`    | `2xLarge.1024GB` |     64      |     16     |
+|    `llama_8b`    |  `24.9.211` |   `1.13.1`    |  `xLarge.512GB`  |     64      |     8      |
+
+The detailed fine-tuning parameters are included in the script.
+
 To fine-tune the model, run the training script as follows:
 
-```
+```bash
 cd moai-examples/finetuning_codes
 pip install -r requirments.txt
 bash scripts/train_{model}.sh
 ```
-By specifying one of the models listed under **supported models** in {model}, you can also experiment with other examples.
+> For training `qwen_14b`, `qwen_72b`, additional environment setup is required using the following command:
+> ```bash
+> pip install -r requirements/requirements_qwen.txt
+> ```
 
-**CURRENTLY SUPPORTED MODELS:**
+By specifying one of the models listed under **example model names** in {model}, you can also experiment with other examples.
+
+**LIST OF EXAMPLE MODELS:**
 
 - `qwen_14b`
 - `qwen_72b`
 - `baichuan`
 - `internlm`
 - `llama_8b`
-
-> For training Qwen, additional environment setup is required using the following command:
-> ```bash
-> pip install -r requirements/requirements_qwen.txt
-> ```
 
 
 The scripts are as follows:
@@ -176,22 +112,6 @@ The above script is based on execution from the `moai-examples/finetuning_codes`
 If modifications are required, please adjust it to fit the client or platform specifications. 
 
 Additionally, paths such as `CONFIG_PATH` , `SAVE_DIR` and `LOG_DIR` should be updated to match the context of the container in use.
-
-
-
-**Recommended Specifications**
-
-The optimized versions of MAF, Torch, and Flavor for each model are as follows:
-
-|      model       | MAF Version | Torch Version |      Flavor      | Train Batch | Eval Batch |
-| :--------------: | :---------: | :-----------: | :--------------: | :---------: | :--------: |
-|    `qwen_14b`    |  `24.9.211` |   `1.13.1`    |  `xLarge.512GB`  |     64      |     16     |
-|    `qwen_72b`    |  `24.9.211` |   `1.13.1`    | `4xLarge.2048GB` |     256     |     8      |
-|    `baichuan`    |  `24.9.211` |   `1.13.1`    |  `xLarge.512GB`  |     64      |     16     |
-|    `internlm`    |  `24.9.212` |   `1.13.1`    | `2xLarge.1024GB` |     64      |     16     |
-|    `llama_8b`    |  `24.9.211` |   `1.13.1`    |  `xLarge.512GB`  |     64      |     16     |
-
-The detailed fine-tuning parameters are included in the script.
 
 
 ## **Directory and Code Details**
