@@ -71,14 +71,14 @@ bash scripts/train_{model}.sh
 
 By specifying one of the models listed under **example model names** in {model}, you can also experiment with other examples.
 
-**LIST OF EXAMPLE MODELS:**
 
-- `qwen_14b`
-- `qwen_72b`
-- `baichuan`
-- `internlm`
-- `llama_8b`
-
+| **LIST OF EXAMPLE MODELS**|
+| :-----------------------: |
+|         `qwen_14b`        |
+|         `qwen_72b`        |
+|         `baichuan`        |
+|         `internlm`        |
+|         `llama_8b`        |
 
 The scripts are as follows:
 
@@ -86,7 +86,6 @@ The scripts are as follows:
 #!/bin/bash
 
 # example of train_qwen_14b.sh
-
 START_TIME=$(TZ="Asia/Seoul" date)
 current_time=$(date +"%y%m%d_%H%M%S")
 
