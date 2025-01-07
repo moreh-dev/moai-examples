@@ -73,8 +73,9 @@ bash scripts/train_{model}.sh
 > pip install -r requirements/requirements_qwen.txt
 > ```
 
-<br>
-By specifying one of the models listed under **example model names** in {model}, you can also run other examples.
+
+By specifying one of the models listed under **example model names** in {model}, you can also run other examples.  
+
 <div align="center" style="margin-top: 1rem;">
 
 | **LIST OF EXAMPLE MODELS**|
@@ -87,7 +88,7 @@ By specifying one of the models listed under **example model names** in {model},
 
 </div>
 
-<br>
+
 The scripts are as follows:
 
 ```bash
