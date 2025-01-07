@@ -188,12 +188,12 @@ moai-examples
 
 ```bash
 finetuning_codes
-├── config.yaml                   # Config file for accelerate.
+├── config.yaml                   # Config file for accelerate
 ├── model                         # Directory containing model-related files
-├── requirements                  # Folder for additional dependencies or packages required for fine-tuning. 
-├── scripts                       # Directory containing shell scripts for different fine-tuning setups.     
-├── train.py                      # Main Python script for initiating the fine-tuning process.
-├── train_internlm.py             # Fine-tuning code for InternLM training.
+├── requirements                  # Folder for additional dependencies or packages required for fine-tuning
+├── scripts                       # Directory containing shell scripts for different fine-tuning setups
+├── train.py                      # Main Python script for initiating the fine-tuning process
+├── train_internlm.py             # Fine-tuning code for InternLM training
 └── utils.py                      # Utility functions for train.py/train_internlm.py
 ```
 
@@ -205,14 +205,14 @@ finetuning_codes
 
 ```bash
 inference_codes
-├── agent_client.py              # Contains code for calling server agent.
-├── benchmark_client.py          # Code for benchmarking online servering performance.
-├── benchmark_result             # Directory to store the results of benchmarking tests.
-├── chat.py                      # Code for handling chat-based interactions with the model.
-├── client_utils.py              # Utility functions for agent_client.py.
-├── prompt.txt                   # Text file containing predefined prompts used during inference.
-├── requirements.txt             # Lists the dependencies required to run the inference code.
-└── scripts                      # Directory for additional scripts related to inference tasks.
+├── agent_client.py              # Contains code for calling server agent
+├── benchmark_client.py          # Code for benchmarking online servering performance
+├── benchmark_result             # Directory to store the results of benchmarking tests
+├── chat.py                      # Code for handling chat-based interactions with the model
+├── client_utils.py              # Utility functions for agent_client.py
+├── prompt.txt                   # Text file containing predefined prompts used during inference
+├── requirements.txt             # Lists the dependencies required to run the inference code
+└── scripts                      # Directory for additional scripts related to inference tasks
 ```
 
 
