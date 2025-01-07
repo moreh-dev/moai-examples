@@ -95,75 +95,6 @@ The optimized versions of MAF, Torch, and Flavor for each model are as follows:
 The detailed fine-tuning parameters are included in the script.
 
 
-### Inference
-
-The MoAI Platform also supports deploying inference servers for your model.
-
-1. Run the script to deploy the model:
-
-    ```
-    bash inference_codes/scripts/change_model.sh
-    ```
-
-2. Select the model number:
-
-    ```
-    Checking agent server status...
-    Agent server is normal
-    
-    ┌───── Current Server Info ────┐
-    │ Model : internlm2_5-20b-chat │
-    │ LoRA : False                 │
-    │ Checkpoint :                 │
-    │ Server Status : NORMAL       │
-    └──────────────────────────────┘
-
-    ========== Supported Model List ==========
-     1. Meta-Llama-3-70B-Instruct
-     2. internlm2_5-20b-chat
-    ==========================================
-    
-    Select Model Number [1-2/q/Q]:
-    ```
-
-3. Check the server status:
-
-    ```bash
-    bash inference_codes/scripts/check_server.sh
-    ```
-
-    Example output:
-
-    ```
-    2024-10-15 15:34:28.736 | INFO | __main__:check_server:38 - Checking agent server status...
-    2024-10-15 15:34:28.754 | INFO | __main__:check_server:41 - Agent server is normal
-    
-    ┌───── Current Server Info ────┐
-    │ Model : internlm2_5-20b-chat │
-    │ LoRA : False                 │
-    │ Checkpoint :                 │
-    │ Server Status : NORMAL       │
-    └──────────────────────────────┘
-    ```
-
-4. Chat with your model locally or build a chat platform using the API:
-
-    ```bash
-    bash inference_codes/scripts/chat.sh
-    ```
-
-    Example chat:
-
-    ```
-    [INFO] Type 'quit' to exit
-    Prompt: hello
-    ================================================================================
-    Assistant:
-    Hello! How can I assist you today?
-    ```
-
-
-
 ## **Directory and Code Details**
 
 ### Repo Structure
@@ -196,25 +127,6 @@ finetuning_codes
 ├── train_internlm.py             # Fine-tuning code for InternLM training
 └── utils.py                      # Utility functions for train.py/train_internlm.py
 ```
-
-
-
-### `inference_codes`
-
- `inference_codes` directory contains scripts, utilities, and configs required for running inference tasks, benchmarking, and interacting with the server.
-
-```bash
-inference_codes
-├── agent_client.py              # Contains code for calling server agent
-├── benchmark_client.py          # Code for benchmarking online servering performance
-├── benchmark_result             # Directory to store the results of benchmarking tests
-├── chat.py                      # Code for handling chat-based interactions with the model
-├── client_utils.py              # Utility functions for agent_client.py
-├── prompt.txt                   # Text file containing predefined prompts used during inference
-├── requirements.txt             # Lists the dependencies required to run the inference code
-└── scripts                      # Directory for additional scripts related to inference tasks
-```
-
 
 
 ## Learn More
