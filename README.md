@@ -23,6 +23,22 @@
 The **moai-examples** repository is designed to work with a cluster where the MoAI Platform is installed.  
 To test these scripts, please contact us.
 
+**Recommended Specifications**
+
+The optimized versions of MAF, Torch, and Flavor for each model are as follows:
+
+<div align="center">
+
+|      Model       | MAF Version | Torch Version |      Flavor      | Train Batch | Eval Batch |
+| :--------------: | :---------: | :-----------: | :--------------: | :---------: | :--------: |
+|    `qwen_14b`    |  `24.9.211` |   `1.13.1`    |  `xLarge.512GB`  |     64      |     8      |
+|    `qwen_72b`    |  `24.9.211` |   `1.13.1`    | `4xLarge.2048GB` |     256     |     8      |
+|    `baichuan`    |  `24.9.211` |   `1.13.1`    |  `xLarge.512GB`  |     64      |     8      |
+|    `internlm`    |  `24.9.212` |   `1.13.1`    | `2xLarge.1024GB` |     64      |     16     |
+|    `llama_8b`    |  `24.9.211` |   `1.13.1`    |  `xLarge.512GB`  |     64      |     8      |
+
+</div>
+
 ### Pytorch Installation & MoAI Accelerator
 
 You can check the current moai version and flavor through `moreh-smi`.
@@ -41,26 +57,7 @@ If they are set differently, please refer to the following links to adjust the t
 - [How to check pytorch installation on MoAI Platform](https://docs.moreh.io/tutorials/llama3_8b_tutorial/1_prepare_fine-tuning/#checking-pytorch-installation)
 - [How to set MoAI accelerator flavor](https://docs.moreh.io/tutorials/llama3_8b_tutorial/1_prepare_fine-tuning/#checking-pytorch-installation)
 
-
 ### Training
-
-**Recommended Specifications**
-
-The optimized versions of MAF, Torch, and Flavor for each model are as follows:
-
-<div align="center">
-
-|      model       | MAF Version | Torch Version |      Flavor      | Train Batch | Eval Batch |
-| :--------------: | :---------: | :-----------: | :--------------: | :---------: | :--------: |
-|    `qwen_14b`    |  `24.9.211` |   `1.13.1`    |  `xLarge.512GB`  |     64      |     8      |
-|    `qwen_72b`    |  `24.9.211` |   `1.13.1`    | `4xLarge.2048GB` |     256     |     8      |
-|    `baichuan`    |  `24.9.211` |   `1.13.1`    |  `xLarge.512GB`  |     64      |     8      |
-|    `internlm`    |  `24.9.212` |   `1.13.1`    | `2xLarge.1024GB` |     64      |     16     |
-|    `llama_8b`    |  `24.9.211` |   `1.13.1`    |  `xLarge.512GB`  |     64      |     8      |
-
-</div>
-
-<br>
 To fine-tune the model, run the training script as follows:
 
 ```bash
@@ -78,7 +75,7 @@ By specifying one of the models listed under **example model names** in {model},
 
 <div align="center" style="margin-top: 1rem;">
 
-| **LIST OF EXAMPLE MODELS**|
+| **List of Example models**|
 | :-----------------------: |
 |         `qwen_14b`        |
 |         `qwen_72b`        |
@@ -93,7 +90,6 @@ The scripts are as follows:
 
 ```bash
 #!/bin/bash
-
 # example of train_qwen_14b.sh
 START_TIME=$(TZ="Asia/Seoul" date)
 current_time=$(date +"%y%m%d_%H%M%S")
