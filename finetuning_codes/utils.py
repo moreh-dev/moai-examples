@@ -92,7 +92,6 @@ def load_model(args):
     """
 
     print(f"Loading {args.model_name_or_path} Tokenizer...")
-    # set_mem_usage_correction_ratio(args)
     configs = AutoConfig.from_pretrained(args.model_name_or_path,
                                          trust_remote_code=True)
     if "baichuan" in configs.architectures[0].lower():
