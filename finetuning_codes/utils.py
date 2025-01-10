@@ -101,6 +101,8 @@ def load_model(args):
         tokenizer = AutoTokenizer.from_pretrained(args.model_name_or_path,
                                                   trust_remote_code=True)
         tokenizer.chat_template = BAICHUAN_CHAT_TEMPLATE
+    elif "gemma" in configs.architectures[0].lower():
+        moreh_config.set_config("advanced_parallelization_memory_usage_correction_ratio", 70)
     elif "llama" in configs.architectures[0].lower():
         from model.llama.modeling_llama import LlamaForCausalLM
         model = LlamaForCausalLM.from_pretrained(args.model_name_or_path)
@@ -113,7 +115,7 @@ def load_model(args):
         model = convert_qkv_unfused(model)
         tokenizer = AutoTokenizer.from_pretrained(args.model_name_or_path,
                                                   trust_remote_code=True)
-    elif "qwen" in configs.architectures[0].lower():
+    elif "qwen" in configs.architectures[0].lower() and "qwen2" not in configs.architectures[0].lower():
         if "14" in args.model_name_or_path.lower():
             moreh_config.set_config("advanced_parallelization_memory_usage_correction_ratio", 70)
         model = AutoModelForCausalLM.from_pretrained(args.model_name_or_path,
