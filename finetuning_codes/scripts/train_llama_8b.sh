@@ -3,20 +3,20 @@
 START_TIME=$(TZ="Asia/Seoul" date)
 current_time=$(date +"%y%m%d_%H%M%S")
 
-TRANSFORMERS_VERBOSITY=info accelerate launch \
-    --config_file /root/poc/finetuning_codes/config.yaml \
-    /root/poc/finetuning_codes/train.py \
-    --model /root/poc/pretrained_models/llama3-8b-instruct/ \
+TOKENIZERS_PARALLELISM=false TRANSFORMERS_VERBOSITY=info accelerate launch \
+    --config_file $CONFIG_PATH \
+    train.py \
+    --model meta-llama/Meta-Llama-3-8B \
     --dataset bitext/Bitext-customer-support-llm-chatbot-training-dataset \
     --lr 0.0001 \
-    --train-batch-size 8 \
-    --eval-batch-size 8 \
+    --train-batch-size 64 \
+    --eval-batch-size 32 \
     --block-size 1024 \
     --num-epochs 5 \
-    --max-steps 20 \
+    --max-steps -1 \
     --log-interval 20 \
-    --save-path /root/poc/checkpoints/llama_lora_finetuned_$current_time \
-    |& tee /root/poc/finetuning_codes/logs/llama_lora_$current_time.log
+    --save-path $SAVE_DIR \
+    |& tee $LOG_DIR
 
 echo "Start: $START_TIME"
 echo "End: $(TZ="Asia/Seoul" date)"

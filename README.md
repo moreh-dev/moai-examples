@@ -18,98 +18,139 @@
 
 ![overview_01](https://github.com/user-attachments/assets/a1d7b9b5-83f6-4844-8f16-fb6a288f54b3)
 
-
-
 ## QuickStart
 
-The **ambre-models** repository is designed to work with a cluster where the MoAI Platform is installed. To test these scripts, please contact us.
+The **moai-examples** repository is designed to work with a cluster where the MoAI Platform is installed.  
+To test these scripts, please contact us.
+
+**Recommended Specifications**
+
+The optimized versions of MAF, Torch, and Flavor for each model are as follows:
+
+<div align="center">
+
+|      Model       | MAF Version | Torch Version |      Flavor      | Train Batch | Eval Batch |
+| :--------------: | :---------: | :-----------: | :--------------: | :---------: | :--------: |
+|    `qwen_14b`    |  `24.9.211` |   `1.13.1`    |  `xLarge.512GB`  |     64      |     8      |
+|    `qwen_72b`    |  `24.9.211` |   `1.13.1`    | `4xLarge.2048GB` |     256     |     8      |
+|    `baichuan`    |  `24.9.211` |   `1.13.1`    |  `xLarge.512GB`  |     64      |     8      |
+|    `internlm`    |  `24.9.212` |   `1.13.1`    | `2xLarge.1024GB` |     64      |     16     |
+|    `llama_8b`    |  `24.9.211` |   `1.13.1`    |  `xLarge.512GB`  |     64      |     8      |
+
+</div>
+
+### Pytorch Installation & MoAI Accelerator
+
+You can check the current moai version and flavor through `moreh-smi`.
+```bash
+moreh-smi
+
++-----------------------------------------------------------------------------------------------+
+|                                          Current Version: 24.9.211  Latest Version: 25.1.201  |
++-----------------------------------------------------------------------------------------------+
+|  Device  |          Name          |  Model  |  Memory Usage  |  Total Memory  |  Utilization  |
++===============================================================================================+
+|  * 0     |  Ambre AI Accelerator  |  micro  |  -             |  -             |  -            |
++-----------------------------------------------------------------------------------------------+
+```
+If they are set differently, please refer to the following links to adjust the torch version and flavor accordingly:
+- [How to check pytorch installation on MoAI Platform](https://docs.moreh.io/tutorials/llama3_8b_tutorial/1_prepare_fine-tuning/#checking-pytorch-installation)
+- [How to set MoAI accelerator flavor](https://docs.moreh.io/tutorials/llama3_8b_tutorial/1_prepare_fine-tuning/#checking-pytorch-installation)
 
 ### Training
+To fine-tune the model, run the training script as follows:
 
-Run the training script to fine-tune the model. For example, to fine-tune the `internlm2_5-20b-chat` model:
-
+```bash
+cd moai-examples/finetuning_codes
+pip install -r requirments.txt
+bash scripts/train_{model}.sh
 ```
-bash finetuning_codes/scripts/train_internlm.py
+> For training `qwen_14b`, `qwen_72b`, additional environment setup is required using the following command:
+> ```bash
+> pip install -r requirements/requirements_qwen.txt
+> ```
+
+
+By specifying one of the models listed under **example model names** in {model}, you can also run other examples.  
+
+<div align="center" style="margin-top: 1rem;">
+
+| **List of Example models**|
+| :-----------------------: |
+|         `qwen_14b`        |
+|         `qwen_72b`        |
+|         `baichuan`        |
+|         `internlm`        |
+|         `llama_8b`        |
+
+</div>
+
+
+The scripts are as follows:
+
+```bash
+#!/bin/bash
+# example of train_qwen_14b.sh
+START_TIME=$(TZ="Asia/Seoul" date)
+current_time=$(date +"%y%m%d_%H%M%S")
+
+TRANSFORMERS_VERBOSITY=info accelerate launch \
+    --config_file $CONFIG_PATH \
+    train.py \
+    --model Qwen/Qwen-14B \
+    --dataset alespalla/chatbot_instruction_prompts \
+    --lr 0.0001 \
+    --train-batch-size 64 \
+    --eval-batch-size 16 \
+    --num-epochs 5 \
+    --max-steps -1 \
+    --log-interval 20 \
+    --save-path $SAVE_DIR \
+    |& tee $LOG_DIR
+
+echo "Start: $START_TIME"
+echo "End: $(TZ="Asia/Seoul" date)"
 ```
-### Inference
 
-The MoAI Platform also supports deploying inference servers for your model.
+The above script is based on execution from the `moai-examples/finetuning_codes` directory.  
+If modifications are required, please adjust it to fit the client or platform specifications.   
+Additionally, paths such as `CONFIG_PATH` , `SAVE_DIR` and `LOG_DIR` should be updated to match the context of the container in use.
 
-1. Run the script to deploy the model:
 
-    ```
-    bash inference_codes/scripts/change_model.sh
-    ```
+## **Directory and Code Details**
 
-2. Select the model number:
+### Repo Structure
 
-    ```
-    Checking agent server status...
-    Agent server is normal
-    
-    ┌───── Current Server Info ────┐
-    │ Model : internlm2_5-20b-chat │
-    │ LoRA : False                 │
-    │ Checkpoint :                 │
-    │ Server Status : NORMAL       │
-    └──────────────────────────────┘
+The structure of the entire repository is as follows:
 
-    ========== Supported Model List ==========
-     1. Meta-Llama-3-70B-Instruct
-     2. internlm2_5-20b-chat
-    ==========================================
-    
-    Select Model Number [1-2/q/Q]:
-    ```
+```bash
+moai-examples
+├── README.md                 # Project overview and instructions
+├── checkpoints               # Directory to store model checkpoints during finetuning
+├── finetuning_codes          # Code related to model fine-tuning
+├── git-hooks                 # Git hooks directory for code formatting and other pre/post-commit tasks
+├── inference_codes           # Code for running inference with the trained model
+└── pretrained_models         # Pretrained weights obtained from Huggingface
+```
 
-3. Check the server status:
 
-    ```bash
-    bash inference_codes/scripts/check_server.sh
-    ```
 
-    Example output:
+### `finetuning_codes`
 
-    ```
-    2024-10-15 15:34:28.736 | INFO | __main__:check_server:38 - Checking agent server status...
-    2024-10-15 15:34:28.754 | INFO | __main__:check_server:41 - Agent server is normal
-    
-    ┌───── Current Server Info ────┐
-    │ Model : internlm2_5-20b-chat │
-    │ LoRA : False                 │
-    │ Checkpoint :                 │
-    │ Server Status : NORMAL       │
-    └──────────────────────────────┘
-    ```
+ `finetuning_codes` directory contains train codes, model configs and scripts necessary for fine-tuning.
 
-4. Chat with your model locally or build a chat platform using the API:
+```bash
+finetuning_codes
+├── config.yaml                   # Config file for accelerate
+├── model                         # Directory containing model-related files
+├── requirements                  # Folder for additional dependencies or packages required for fine-tuning
+├── scripts                       # Directory containing shell scripts for different fine-tuning setups
+├── train.py                      # Main Python script for initiating the fine-tuning process
+├── train_internlm.py             # Fine-tuning code for InternLM training
+└── utils.py                      # Utility functions for train.py/train_internlm.py
+```
 
-    ```bash
-    bash inference_codes/scripts/chat.sh
-    ```
 
-    Example chat:
-
-    ```
-    [INFO] Type 'quit' to exit
-    Prompt: hello
-    ================================================================================
-    Assistant:
-    Hello! How can I assist you today?
-    ```
-
-## Supported Models
-
-This repository supports any multi-billion or multi-trillion parameter models for training and serving. 
-
-### Currently Supported Models:
-
-- **Meta-Llama-3-70B-Instruct**
-- **InternLM 2.5-20B Chat**
-
-### Future Models:
-
-Additional models will be added in future updates. Stay tuned for more!
 ## Learn More
 
 | **Section**       | **Description**                                 |
