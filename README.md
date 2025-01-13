@@ -31,13 +31,13 @@ The optimized versions of MAF, Torch, and Flavor for each model are as follows:
 
 |      Model       | MAF Version | Torch Version |      Flavor      | Train Batch | Eval Batch |
 | :--------------: | :---------: | :-----------: | :--------------: | :---------: | :--------: |
-|    `qwen_14b`    |  `24.9.211` |   `1.13.1`    |  `xLarge.512GB`  |     64      |     8      |
-|    `qwen_72b`    |  `24.9.211` |   `1.13.1`    | `4xLarge.2048GB` |     256     |     8      |
-|    `qwen2_72b`   |  `24.9.211` |   `1.13.1`    | `4xLarge.2048GB` |     32      |     8      |
-|    `baichuan`    |  `24.9.211` |   `1.13.1`    |  `xLarge.512GB`  |     64      |     8      |
-|    `internlm`    |  `24.9.212` |   `1.13.1`    | `2xLarge.1024GB` |     64      |     16     |
-|    `llama_8b`    |  `24.9.211` |   `1.13.1`    |  `xLarge.512GB`  |     64      |     8      |
-|    `gemma2_27b`  |  `24.9.211` |   `1.13.1`    | `2xLarge.1024GB` |     64      |     8      |
+|    [Qwen/Qwen-14B](https://huggingface.co/Qwen/Qwen-14B)    |  `24.9.211` |   `1.13.1`    |  `xLarge.512GB`  |     64      |     8      |
+|    [Qwen/Qwen-72B](https://huggingface.co/Qwen/Qwen-72B)    |  `24.9.211` |   `1.13.1`    | `4xLarge.2048GB` |     256     |     8      |
+|    [Qwen/Qwen2-72B-Instruct](https://huggingface.co/Qwen/Qwen2-72B-Instruct)   |  `24.9.211` |   `1.13.1`    | `4xLarge.2048GB` |     32      |     8      |
+|    [baichuan-inc/Baichuan-13B-Chat](https://huggingface.co/baichuan-inc/Baichuan-13B-Chat)    |  `24.9.211` |   `1.13.1`    |  `xLarge.512GB`  |     64      |     8      |
+|    [internlm/internlm2_5-20b-chat](https://huggingface.co/internlm/internlm2_5-20b-chat)    |  `24.9.212` |   `1.13.1`    | `2xLarge.1024GB` |     64      |     16     |
+|    [meta-llama/Meta-Llama-3-8B ](https://huggingface.co/meta-llama/Meta-Llama-3-8B)   |  `24.9.211` |   `1.13.1`    |  `xLarge.512GB`  |     64      |     8      |
+|    [google/gemma-2-27b-it](https://huggingface.co/google/gemma-2-27b-it)  |  `24.9.211` |   `1.13.1`    | `2xLarge.1024GB` |     64      |     8      |
 
 
 </div>
@@ -74,18 +74,20 @@ bash scripts/train_{model}.sh
 > ```
 
 
-By specifying one of the models listed under **example model names** in {model}, you can also run other examples.  
+By specifying one of the models listed under **example model names** in `{model}`, you can also run other examples.  
 
 <div align="center" style="margin-top: 1rem;">
 
-| **List of Example models**|
-| :-----------------------: |
-|         `qwen_14b`        |
-|         `qwen_72b`        |
-|         `baichuan`        |
-|         `internlm`        |
-|         `llama_8b`        |
-
+|                                                                                         |  **example model names** |
+|-----------------------------------------------------------------------------------------|---------------|
+| [Qwen/Qwen-14B](https://huggingface.co/Qwen/Qwen-14B)                                   | `qwen_14b`    |
+| [Qwen/Qwen-72B](https://huggingface.co/Qwen/Qwen-72B)                                   | `qwen_72b`    |
+| [Qwen/Qwen2-72B-Instruct](https://huggingface.co/Qwen/Qwen2-72B-Instruct)               | `qwen2_72b`   |
+| [baichuan-inc/Baichuan-13B-Chat](https://huggingface.co/baichuan-inc/Baichuan-13B-Chat) | `baichuan`    |
+| [internlm/internlm2_5-20b-chat](https://huggingface.co/internlm/internlm2_5-20b-chat)   | `internlm`    |
+| [meta-llama/Meta-Llama-3-8B ](https://huggingface.co/meta-llama/Meta-Llama-3-8B)        | `llama_8b`    |
+| [google/gemma-2-27b-it](https://huggingface.co/google/gemma-2-27b-it)                   | `gemma`       |
+|                                                                                         |               |
 </div>
 
 
