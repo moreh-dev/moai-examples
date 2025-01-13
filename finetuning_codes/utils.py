@@ -101,15 +101,15 @@ def load_model(args):
         tokenizer = AutoTokenizer.from_pretrained(args.model_name_or_path,
                                                   trust_remote_code=True)
         tokenizer.chat_template = BAICHUAN_CHAT_TEMPLATE
+    elif "gemma2" in configs.architectures[0].lower():
+        moreh_config.set_config("advanced_parallelization_memory_usage_correction_ratio", 70)
+        model = AutoModelForCausalLM.from_pretrained(args.model_name_or_path, use_cache = False)
+        tokenizer = AutoTokenizer.from_pretrained(args.model_name_or_path)
     elif "llama" in configs.architectures[0].lower():
         from model.llama.modeling_llama import LlamaForCausalLM
         model = LlamaForCausalLM.from_pretrained(args.model_name_or_path)
         tokenizer = AutoTokenizer.from_pretrained(args.model_name_or_path,
                                                   trust_remote_code=True)
-    elif "qwen2" in configs.architectures[0].lower():
-        from model.qwen2.modeling_qwen2 import Qwen2ForCausalLM
-        model = Qwen2ForCausalLM.from_pretrained(args.model_name_or_path)
-        tokenizer = AutoTokenizer.from_pretrained(args.model_name_or_path)
     elif "internlm" in configs.architectures[0].lower():
         from model.internlm.modeling_internlm2 import InternLM2ForCausalLM
         model = InternLM2ForCausalLM.from_pretrained(args.model_name_or_path,
@@ -117,7 +117,7 @@ def load_model(args):
         model = convert_qkv_unfused(model)
         tokenizer = AutoTokenizer.from_pretrained(args.model_name_or_path,
                                                   trust_remote_code=True)
-    elif "qwen" in configs.architectures[0].lower():
+    elif "qwen" in configs.architectures[0].lower() and "qwen2" not in configs.architectures[0].lower():
         if "14" in args.model_name_or_path.lower():
             moreh_config.set_config("advanced_parallelization_memory_usage_correction_ratio", 70)
         model = AutoModelForCausalLM.from_pretrained(args.model_name_or_path,
@@ -448,6 +448,7 @@ def save_model_and_tokenizer(args, model, tokenizer):
         model = convert_qkv_fused(model)
 
     print(f"Saving model and tokenizer in {args.save_path}")
+    model = model.to("cpu")
     model.save_pretrained(args.save_path)
     tokenizer.save_pretrained(args.save_path)
     print(f"Model and Tokenizer is saved in {args.save_path}")
