@@ -78,7 +78,7 @@ By specifying one of the models listed under **example model names** in `{model}
 
 <div align="center" style="margin-top: 1rem;">
 
-|                                                                                         |  **example model names** |
+|  **List of Example Models**                                                             |  Name in `{model}`|
 |-----------------------------------------------------------------------------------------|---------------|
 | [Qwen/Qwen-14B](https://huggingface.co/Qwen/Qwen-14B)                                   | `qwen_14b`    |
 | [Qwen/Qwen-72B](https://huggingface.co/Qwen/Qwen-72B)                                   | `qwen_72b`    |
@@ -87,7 +87,6 @@ By specifying one of the models listed under **example model names** in `{model}
 | [internlm/internlm2_5-20b-chat](https://huggingface.co/internlm/internlm2_5-20b-chat)   | `internlm`    |
 | [meta-llama/Meta-Llama-3-8B ](https://huggingface.co/meta-llama/Meta-Llama-3-8B)        | `llama_8b`    |
 | [google/gemma-2-27b-it](https://huggingface.co/google/gemma-2-27b-it)                   | `gemma`       |
-|                                                                                         |               |
 </div>
 
 
