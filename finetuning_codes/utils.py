@@ -103,6 +103,8 @@ def load_model(args):
         tokenizer.chat_template = BAICHUAN_CHAT_TEMPLATE
     elif "gemma2" in configs.architectures[0].lower():
         moreh_config.set_config("advanced_parallelization_memory_usage_correction_ratio", 70)
+        model = AutoModelForCausalLM.from_pretrained(args.model_name_or_path, use_cache = False)
+        tokenizer = AutoTokenizer.from_pretrained(args.model_name_or_path)
     elif "llama" in configs.architectures[0].lower():
         from model.llama.modeling_llama import LlamaForCausalLM
         model = LlamaForCausalLM.from_pretrained(args.model_name_or_path)
