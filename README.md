@@ -120,6 +120,22 @@ The above script is based on execution from the `moai-examples/finetuning_codes`
 If modifications are required, please adjust it to fit the client or platform specifications.   
 Additionally, paths such as `CONFIG_PATH` , `SAVE_DIR` and `LOG_DIR` should be updated to match the context of the container in use.
 
+### Inference
+<div align="center" style="margin-top: 1rem;">
+
+| Supported Models                      |
+|-------------------------------------|
+| [Qwen/Qwen-14B](https://huggingface.co/Qwen/Qwen-14B)                          |
+| [Qwen/Qwen-72B](https://huggingface.co/Qwen/Qwen-72B)                       |
+| [Qwen/Qwen2-72B-Instruct](https://huggingface.co/Qwen/Qwen2-72B-Instruct)               |
+| [baichuan-inc/Baichuan-13B-Chat](https://huggingface.co/baichuan-inc/Baichuan-13B-Chat)      |
+| [internlm/internlm2_5-20b-chat](https://huggingface.co/internlm/internlm2_5-20b-chat)      |
+| [meta-llama/Meta-Llama-3-8B](https://huggingface.co/meta-llama/Meta-Llama-3-8B)          |
+| [google/gemma-2-27b-it](https://huggingface.co/google/gemma-2-27b-it)               |
+| [THUDM/chatglm3-6b-32k](https://huggingface.co/THUDM/chatglm3-6b-32k)               |
+| [Qwen/Qwen2.5-32B-Instruct-GPTQ-Int8](https://huggingface.co/Qwen/Qwen2.5-32B-Instruct-GPTQ-Int8) |
+
+</div>
 
 ## **Directory and Code Details**
 
