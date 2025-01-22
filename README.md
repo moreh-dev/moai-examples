@@ -121,21 +121,11 @@ If modifications are required, please adjust it to fit the client or platform sp
 Additionally, paths such as `CONFIG_PATH` , `SAVE_DIR` and `LOG_DIR` should be updated to match the context of the container in use.
 
 ### Inference
-<div align="center" style="margin-top: 1rem;">
 
-| Supported Models                      |
-|-------------------------------------|
-| [Qwen/Qwen-14B](https://huggingface.co/Qwen/Qwen-14B)                          |
-| [Qwen/Qwen-72B](https://huggingface.co/Qwen/Qwen-72B)                       |
-| [Qwen/Qwen2-72B-Instruct](https://huggingface.co/Qwen/Qwen2-72B-Instruct)               |
-| [baichuan-inc/Baichuan-13B-Chat](https://huggingface.co/baichuan-inc/Baichuan-13B-Chat)      |
-| [internlm/internlm2_5-20b-chat](https://huggingface.co/internlm/internlm2_5-20b-chat)      |
-| [meta-llama/Meta-Llama-3-8B](https://huggingface.co/meta-llama/Meta-Llama-3-8B)          |
-| [google/gemma-2-27b-it](https://huggingface.co/google/gemma-2-27b-it)               |
-| [THUDM/chatglm3-6b-32k](https://huggingface.co/THUDM/chatglm3-6b-32k)               |
-| [Qwen/Qwen2.5-32B-Instruct-GPTQ-Int8](https://huggingface.co/Qwen/Qwen2.5-32B-Instruct-GPTQ-Int8) |
 
-</div>
+Please refer to the [inference_codes/README.md]()
+
+
 
 ## **Directory and Code Details**
 
@@ -166,9 +156,23 @@ finetuning_codes
 ├── requirements                  # Folder for additional dependencies or packages required for fine-tuning
 ├── scripts                       # Directory containing shell scripts for different fine-tuning setups
 ├── train.py                      # Main Python script for initiating the fine-tuning process
-├── train_internlm.py             # Fine-tuning code for InternLM training
 └── utils.py                      # Utility functions for train.py/train_internlm.py
 ```
+
+### `inference_codes`
+
+ `inference_codes` directory contains scripts for model inference. 
+
+```bash
+finetuning_codes
+├── agent_client.py            # Python script for model loading
+├── benchmark_client.py        # Python script to evaluate inference performance 
+├── requirements.txt           # Requirements for inference 
+├── chat.py                    # Python script for human evaluation of loaded model
+└── client_utils.py            # Utility functions for chat.py/benchmark_client.py/agent_client.py
+```
+
+
 
 
 ## Learn More
