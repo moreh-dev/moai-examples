@@ -10,3 +10,4 @@ openai
 tenacity
 trl
 einops
+trl==0.11.4

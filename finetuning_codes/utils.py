@@ -125,6 +125,12 @@ def load_model(args):
                                                      torch_dtype='float32', fp32=True)
         tokenizer = AutoTokenizer.from_pretrained("Qwen/Qwen-tokenizer",
                                                   trust_remote_code=True)
+    elif "gptneoxforcausallm" in configs.architectures[0].lower():
+        #For databricks/dolly-v2-12b, because it uses GPTNeoXForCausalLM architecture
+        model = AutoModelForCausalLM.from_pretrained(args.model_name_or_path,
+                                                     trust_remote_code=True)
+        tokenizer = AutoTokenizer.from_pretrained("databricks/dolly-v2-12b",
+                                                  trust_remote_code=True)
     else:
         model = AutoModelForCausalLM.from_pretrained(args.model_name_or_path, use_cache = False)
         tokenizer = AutoTokenizer.from_pretrained(args.model_name_or_path)
@@ -185,6 +191,20 @@ def load_custom_dataset(args):
         dataset["validation"] = load_dataset(
             args.dataset_name_or_path,
             split="train[90%:95%]").with_format("torch")
+    elif args.dataset_name_or_path == "mlabonne/mini-platypus":
+        dataset = load_dataset(args.dataset_name_or_path).with_format("torch")
+        dataset["train"] = load_dataset(args.dataset_name_or_path,
+                                        split="train[:90%]").with_format("torch")
+        dataset["validation"] = load_dataset(
+            args.dataset_name_or_path,
+            split="train[90%:95%]").with_format("torch")
+    elif args.dataset_name_or_path == "fawern/Text-to-sql-query-generation":
+        dataset = load_dataset(args.dataset_name_or_path).with_format("torch")
+        dataset["train"] = load_dataset(args.dataset_name_or_path,
+                                        split="train[:90%]").with_format("torch")
+        dataset["validation"] = load_dataset(
+            args.dataset_name_or_path,
+            split="train[90%:95%]").with_format("torch")
     else:
         dataset = load_dataset(args.dataset_name_or_path).with_format("torch")
 
@@ -226,6 +246,40 @@ def preprocess_dataset(args, dataset, tokenizer):
                            truncation=True,
                            max_length=args.block_size,
                            padding="max_length")
+        result['labels'] = copy.deepcopy(result['input_ids'])
+        result['position_ids'] = torch.arange(0, len(result['labels']))
+        return result
+
+    def preprocess_platypus(prompt):
+        if tokenizer.chat_template is not None:
+            chat = [
+                {
+                    "role": "user",
+                    "content": f"{prompt['instruction']}"
+                },
+                {
+                    "role": "assistant",
+                    "content": f"{prompt['output']}"
+                },
+            ]
+            chat = tokenizer.apply_chat_template(chat, tokenize=False)
+        else:
+            chat = f"##INSTRUCTION {prompt['instruction']}\n\n##RESPONSE {prompt['output']}"
+        result = tokenizer(chat,
+                           truncation=True,
+                           max_length=args.block_size,
+                           padding="max_length")
+        result['labels'] = copy.deepcopy(result['input_ids'])
+        result['position_ids'] = torch.arange(0, len(result['labels']))
+        return result
+
+
+    def preprocess_sql_query_generation(prompt):
+        chat = prompt.get('prompt')
+        result = tokenizer(chat,
+                        truncation=True,
+                        max_length=args.block_size,
+                        padding="max_length")
         result['labels'] = copy.deepcopy(result['input_ids'])
         result['position_ids'] = torch.arange(0, len(result['labels']))
         return result
@@ -297,6 +351,18 @@ def preprocess_dataset(args, dataset, tokenizer):
                                                 load_from_cache_file=True)
         dataset['validation'] = dataset['validation'].map(
             preprocess_chatbot, num_proc=1, load_from_cache_file=True)
+    elif args.dataset_name_or_path == "mlabonne/mini-platypus":
+        dataset['train'] = dataset['train'].map(preprocess_platypus,
+                                                num_proc=1,
+                                                load_from_cache_file=True)
+        dataset['validation'] = dataset['validation'].map(
+            preprocess_platypus, num_proc=1, load_from_cache_file=True)
+    elif args.dataset_name_or_path == "fawern/Text-to-sql-query-generation":
+        dataset['train'] = dataset['train'].map(preprocess_sql_query_generation,
+                                                num_proc=1,
+                                                load_from_cache_file=True)
+        dataset['validation'] = dataset['validation'].map(
+            preprocess_sql_query_generation, num_proc=1, load_from_cache_file=True)
     else:
         dataset = dataset.map(preprocess, num_proc=8, load_from_cache_file=True)
 
