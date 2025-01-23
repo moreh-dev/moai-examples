@@ -95,7 +95,6 @@ def load_model(args):
     configs = AutoConfig.from_pretrained(args.model_name_or_path,
                                          trust_remote_code=True)
     if "baichuan" in configs.architectures[0].lower():
-        moreh_config.set_config("advanced_parallelization_memory_usage_correction_ratio", 70)
         from model.baichuan.modeling_baichuan import BaichuanForCausalLM
         model = BaichuanForCausalLM.from_pretrained(args.model_name_or_path)
         tokenizer = AutoTokenizer.from_pretrained(args.model_name_or_path,
@@ -118,8 +117,6 @@ def load_model(args):
         tokenizer = AutoTokenizer.from_pretrained(args.model_name_or_path,
                                                   trust_remote_code=True)
     elif "qwen" in configs.architectures[0].lower() and "qwen2" not in configs.architectures[0].lower():
-        if "14" in args.model_name_or_path.lower():
-            moreh_config.set_config("advanced_parallelization_memory_usage_correction_ratio", 70)
         model = AutoModelForCausalLM.from_pretrained(args.model_name_or_path,
                                                      trust_remote_code=True,
                                                      torch_dtype='float32', fp32=True)
