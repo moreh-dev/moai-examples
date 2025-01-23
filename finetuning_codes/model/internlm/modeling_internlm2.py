@@ -444,7 +444,7 @@ class InternLM2Attention(nn.Module):
                 key_states.transpose(1, 2).contiguous(),
                 value_states.transpose(1, 2).contiguous(),
                 padding_mask=attention_mask,
-                dropout_rate=0.0,
+                dropout_p=0.0,
                 softmax_scale=scale_factor,
                 causal=True)
 
