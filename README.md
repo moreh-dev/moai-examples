@@ -120,6 +120,12 @@ The above script is based on execution from the `moai-examples/finetuning_codes`
 If modifications are required, please adjust it to fit the client or platform specifications.   
 Additionally, paths such as `CONFIG_PATH` , `SAVE_DIR` and `LOG_DIR` should be updated to match the context of the container in use.
 
+### Inference
+
+
+Please refer to the [inference_codes/README.md]()
+
+
 
 ## **Directory and Code Details**
 
@@ -150,9 +156,23 @@ finetuning_codes
 ├── requirements                  # Folder for additional dependencies or packages required for fine-tuning
 ├── scripts                       # Directory containing shell scripts for different fine-tuning setups
 ├── train.py                      # Main Python script for initiating the fine-tuning process
-├── train_internlm.py             # Fine-tuning code for InternLM training
 └── utils.py                      # Utility functions for train.py/train_internlm.py
 ```
+
+### `inference_codes`
+
+ `inference_codes` directory contains scripts for model inference. 
+
+```bash
+finetuning_codes
+├── agent_client.py            # Python script for model loading
+├── benchmark_client.py        # Python script to evaluate inference performance 
+├── requirements.txt           # Requirements for inference 
+├── chat.py                    # Python script for human evaluation of loaded model
+└── client_utils.py            # Utility functions for chat.py/benchmark_client.py/agent_client.py
+```
+
+
 
 
 ## Learn More
