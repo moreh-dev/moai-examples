@@ -31,13 +31,13 @@ The optimized versions of MAF, Torch, and Flavor for each model are as follows:
 
 |      Model       | MAF Version | Torch Version |      Flavor      | Train Batch | Eval Batch |
 | :--------------: | :---------: | :-----------: | :--------------: | :---------: | :--------: |
-|    [Qwen/Qwen-14B](https://huggingface.co/Qwen/Qwen-14B)    |  `24.9.211` |   `1.13.1`    |  `xLarge.512GB`  |     64      |     8      |
+|    [Qwen/Qwen-14B](https://huggingface.co/Qwen/Qwen-14B)    |  `25.1.202` |   `2.1.0`    |  `xLarge.512GB`  |     64      |     8      |
 |    [Qwen/Qwen-72B](https://huggingface.co/Qwen/Qwen-72B)    |  `24.9.211` |   `1.13.1`    | `4xLarge.2048GB` |     256     |     8      |
 |    [Qwen/Qwen2-72B-Instruct](https://huggingface.co/Qwen/Qwen2-72B-Instruct)   |  `24.9.211` |   `1.13.1`    | `4xLarge.2048GB` |     32      |     8      |
-|    [baichuan-inc/Baichuan-13B-Chat](https://huggingface.co/baichuan-inc/Baichuan-13B-Chat)    |  `24.9.211` |   `1.13.1`    |  `xLarge.512GB`  |     64      |     8      |
-|    [internlm/internlm2_5-20b-chat](https://huggingface.co/internlm/internlm2_5-20b-chat)    |  `24.9.212` |   `1.13.1`    | `2xLarge.1024GB` |     64      |     16     |
-|    [meta-llama/Meta-Llama-3-8B ](https://huggingface.co/meta-llama/Meta-Llama-3-8B)   |  `24.9.211` |   `1.13.1`    |  `xLarge.512GB`  |     64      |     8      |
-|    [google/gemma-2-27b-it](https://huggingface.co/google/gemma-2-27b-it)  |  `24.9.211` |   `1.13.1`    | `2xLarge.1024GB` |     64      |     8      |
+|    [baichuan-inc/Baichuan-13B-Chat](https://huggingface.co/baichuan-inc/Baichuan-13B-Chat)    |  `25.1.202` |   `2.1.0`    |  `xLarge.512GB`  |     64      |     8      |
+|    [internlm/internlm2_5-20b-chat](https://huggingface.co/internlm/internlm2_5-20b-chat)    |  `25.1.202` |   `2.1.0`    | `2xLarge.1024GB` |     64      |     16     |
+|    [meta-llama/Meta-Llama-3-8B ](https://huggingface.co/meta-llama/Meta-Llama-3-8B)   |  `25.1.202` |   `2.1.0`    |  `xLarge.512GB`  |     64      |     8      |
+|    [google/gemma-2-27b-it](https://huggingface.co/google/gemma-2-27b-it)  |  `25.1.202` |   `2.1.0`    | `2xLarge.1024GB` |     64      |     8      |
 
 
 </div>
