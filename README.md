@@ -49,7 +49,7 @@ You can check the current moai version and flavor through `moreh-smi`.
 moreh-smi
 
 +-----------------------------------------------------------------------------------------------+
-|                                          Current Version: 24.9.211  Latest Version: 25.1.201  |
+|                                          Current Version: 25.1.202  Latest Version: 25.1.202  |
 +-----------------------------------------------------------------------------------------------+
 |  Device  |          Name          |  Model  |  Memory Usage  |  Total Memory  |  Utilization  |
 +===============================================================================================+
