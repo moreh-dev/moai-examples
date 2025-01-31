@@ -29,8 +29,6 @@ The optimized versions of MAF, Torch, and Flavor for each model are as follows:
 
 <div align="center">
 
-**Python Version : 3.10** 
-
 
 |                                          Model                                          | MAF Version | Torch Version | Python Version |      Flavor      | Train Batch | Eval Batch | Eval Batch |
 |:---------------------------------------------------------------------------------------:|:-----------:|:-------------:|----------------|:----------------:|:-----------:|:----------:|:----------:|
