@@ -8,7 +8,7 @@ TOKENIZERS_PARALLELISM=false TRANSFORMERS_VERBOSITY=info accelerate launch \
     train.py \
     --model baichuan-inc/Baichuan-13B-Chat  \
     --dataset bitext/Bitext-customer-support-llm-chatbot-training-dataset \
-    --lr 0.00005 \
+    --lr 0.000001 \
     --train-batch-size 64 \
     --eval-batch-size 16 \
     --block-size 1024 \
