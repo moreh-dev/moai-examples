@@ -11,9 +11,9 @@ TOKENIZERS_PARALLELISM=false TRANSFORMERS_VERBOSITY=info accelerate launch \
     --lr 0.000001 \
     --train-batch-size 32 \
     --eval-batch-size 32 \
-    --num-epochs 3 \
-    --max-steps 20 \
-    --log-interval 10 \
+    --num-epochs 5 \
+    --max-steps -1 \
+    --log-interval 20 \
     --save-path $SAVE_DIR \
     |& tee $LOG_DIR
 

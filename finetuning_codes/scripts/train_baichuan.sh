@@ -8,13 +8,13 @@ TOKENIZERS_PARALLELISM=false TRANSFORMERS_VERBOSITY=info accelerate launch \
     train.py \
     --model baichuan-inc/Baichuan-13B-Chat  \
     --dataset bitext/Bitext-customer-support-llm-chatbot-training-dataset \
-    --lr 0.000001 \
+    --lr 0.00005 \
     --train-batch-size 64 \
     --eval-batch-size 16 \
     --block-size 1024 \
-    --num-epochs 3 \
+    --num-epochs 5 \
     --max-steps -1 \
-    --log-interval 10 \
+    --log-interval 20 \
     --save-path $SAVE_DIR \
     |& tee $LOG_DIR
 
