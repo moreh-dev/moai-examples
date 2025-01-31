@@ -29,16 +29,16 @@ The optimized versions of MAF, Torch, and Flavor for each model are as follows:
 
 <div align="center">
 
-|      Model       | MAF Version | Torch Version |      Flavor      | Train Batch | Eval Batch |
-| :--------------: | :---------: | :-----------: | :--------------: | :---------: | :--------: |
-|    [Qwen/Qwen-14B](https://huggingface.co/Qwen/Qwen-14B)    |  `25.1.202` |   `2.1.0`    |  `xLarge.512GB`  |     64      |     8      |
-|    [Qwen/Qwen-72B](https://huggingface.co/Qwen/Qwen-72B)    |  `24.9.211` |   `1.13.1`    | `4xLarge.2048GB` |     256     |     8      |
-|    [Qwen/Qwen2-72B-Instruct](https://huggingface.co/Qwen/Qwen2-72B-Instruct)   |  `24.9.211` |   `1.13.1`    | `4xLarge.2048GB` |     32      |     8      |
-|    [baichuan-inc/Baichuan-13B-Chat](https://huggingface.co/baichuan-inc/Baichuan-13B-Chat)    |  `25.1.202` |   `2.1.0`    |  `xLarge.512GB`  |     64      |     8      |
-|    [internlm/internlm2_5-20b-chat](https://huggingface.co/internlm/internlm2_5-20b-chat)    |  `25.1.202` |   `2.1.0`    | `2xLarge.1024GB` |     64      |     16     |
-|    [meta-llama/Meta-Llama-3-8B ](https://huggingface.co/meta-llama/Meta-Llama-3-8B)   |  `25.1.202` |   `2.1.0`    |  `xLarge.512GB`  |     64      |     8      |
-|    [google/gemma-2-27b-it](https://huggingface.co/google/gemma-2-27b-it)  |  `25.1.202` |   `2.1.0`    | `2xLarge.1024GB` |     64      |     8      |
 
+|                                          Model                                          | MAF Version | Torch Version | Python Version |      Flavor      | Train Batch | Eval Batch |
+|:---------------------------------------------------------------------------------------:|:-----------:|:-------------:|----------------|:----------------:|:-----------:|:----------:|
+|                  [Qwen/Qwen-14B](https://huggingface.co/Qwen/Qwen-14B)                  |  `25.1.202` |    `2.1.0`    | `3.10`         |  `xLarge.512GB`  |      64     |      8     |
+|                  [Qwen/Qwen-72B](https://huggingface.co/Qwen/Qwen-72B)                  |  `25.1.202` |    `2.1.0`    | `3.10`         | `4xLarge.2048GB` |     256     |      8     |
+|        [Qwen/Qwen2-72B-Instruct](https://huggingface.co/Qwen/Qwen2-72B-Instruct)        |  `25.1.202` |    `2.1.0`    | `3.10`         | `4xLarge.2048GB` |      64     |      8     |
+| [baichuan-inc/Baichuan-13B-Chat](https://huggingface.co/baichuan-inc/Baichuan-13B-Chat) |  `25.1.202` |    `2.1.0`    | `3.10`         |  `xLarge.512GB`  |      64     |      8     |
+|  [internlm/internlm2_5-20b-chat](https://huggingface.co/internlm/internlm2_5-20b-chat)  |  `25.1.202` |    `2.1.0`    | `3.10`         | `2xLarge.1024GB` |      64     |     16     |
+|     [meta-llama/Meta-Llama-3-8B ](https://huggingface.co/meta-llama/Meta-Llama-3-8B)    |  `25.1.202` |    `2.1.0`    | `3.10`         |  `xLarge.512GB`  |      64     |      8     |
+|          [google/gemma-2-27b-it](https://huggingface.co/google/gemma-2-27b-it)          |  `25.1.202` |    `2.1.0`    | `3.10`         | `2xLarge.1024GB` |      64     |      8     |
 
 </div>
 
@@ -49,7 +49,7 @@ You can check the current moai version and flavor through `moreh-smi`.
 moreh-smi
 
 +-----------------------------------------------------------------------------------------------+
-|                                          Current Version: 24.9.211  Latest Version: 25.1.201  |
+|                                          Current Version: 25.1.202  Latest Version: 25.1.202  |
 +-----------------------------------------------------------------------------------------------+
 |  Device  |          Name          |  Model  |  Memory Usage  |  Total Memory  |  Utilization  |
 +===============================================================================================+
