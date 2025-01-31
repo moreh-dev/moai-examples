@@ -123,7 +123,7 @@ Additionally, paths such as `CONFIG_PATH` , `SAVE_DIR` and `LOG_DIR` should be u
 ### Inference
 
 
-Please refer to the [inference_codes/README.md]()
+Please refer to the [inference_codes/README.md](inference_codes/README.md)
 
 
 
