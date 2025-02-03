@@ -3,8 +3,8 @@
 START_TIME=$(TZ="Asia/Seoul" date)
 current_time=$(date +"%y%m%d_%H%M%S")
 
-export SAVE_DIR='/root/poc/checkpoints/dolly_finetuned_new_run'
-export LOG_DIR='/root/poc/logs/dolly_finetune_new.log'
+export SAVE_DIR='/root/poc/checkpoints/dolly_finetuned_${current_time}'
+export LOG_DIR='/root/poc/logs/dolly_finetune_${current_time}.log'
 
 TOKENIZERS_PARALLELISM=false TRANSFORMERS_VERBOSITY=info accelerate launch \
     --config_file config.yaml \
