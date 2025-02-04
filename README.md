@@ -42,7 +42,15 @@ The optimized versions of MAF, Torch, and Flavor for each model are as follows:
 
 </div>
 
-### Pytorch Installation & MoAI Accelerator
+### Install
+
+[![python](https://img.shields.io/badge/Python-3.10-3776AB.svg?style=flat&logo=python&logoColor=white)](https://www.python.org)
+
+```bash
+pip install torch==2.1.0+moreh25.1.202 torchvision==0.16.0 sympy
+```
+
+### MoAI Accelerator
 
 You can check the current moai version and flavor through `moreh-smi`.
 ```bash
