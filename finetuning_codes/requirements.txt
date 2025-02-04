@@ -1,4 +1,4 @@
-transformers
+transformers==4.48.2
 setuptools==69.5.1
 hydra-core
 peft==0.6.1
