@@ -97,8 +97,8 @@ By specifying one of the models listed under **example model names** in `{model}
 | [meta-llama/Meta-Llama-3-8B ](https://huggingface.co/meta-llama/Meta-Llama-3-8B)        | `llama_8b`    |
 | [meta-llama/Meta-Llama-3-70B-Instuct ](https://huggingface.co/meta-llama/Meta-Llama-3-70B-Instruct) | `llama_70b` |
 | [google/gemma-2-27b-it](https://huggingface.co/google/gemma-2-27b-it)                   | `gemma`       |
-|</div>||
 
+</div>
 
 The scripts are as follows:
 
