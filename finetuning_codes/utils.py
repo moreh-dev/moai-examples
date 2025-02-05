@@ -507,6 +507,31 @@ def set_mem_usage_correction_ratio(args):
             "advanced_parallelization_memory_usage_correction_ratio",
             args.memory_usage_correction_ratio)
 
+def get_batch_samples(self, epoch_iterator, num_batches):
+    batch_samples = []
+    num_items_in_batch = None
+    for _ in range(num_batches):
+        try:
+            batch_samples += [next(epoch_iterator)]
+        except StopIteration:
+            break
+
+    if len(batch_samples) > 0 and "labels" in batch_samples[0]:
+        # For now we don't support object detection
+        try:
+            num_items_in_batch = sum([(batch["labels"].ne(-100)).sum() for batch in batch_samples])
+        except (TypeError, AttributeError):
+            pass
+
+    if self.args.average_tokens_across_devices and num_items_in_batch is not None:
+        num_items_in_batch = self.accelerator.gather(num_items_in_batch).sum().item()
+
+    if torch.is_tensor(num_items_in_batch):
+        num_items_in_batch = num_items_in_batch
+
+    return batch_samples, num_items_in_batch
+
+
 
 class TrainCallback(TrainerCallback):
 
