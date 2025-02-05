@@ -105,8 +105,7 @@ def load_model(args):
         model = AutoModelForCausalLM.from_pretrained(args.model_name_or_path, use_cache = False)
         tokenizer = AutoTokenizer.from_pretrained(args.model_name_or_path)
     elif "llama" in configs.architectures[0].lower():
-        from model.llama.modeling_llama import LlamaForCausalLM
-        model = LlamaForCausalLM.from_pretrained(args.model_name_or_path)
+        model = AutoModelForCausalLM.from_pretrained(args.model_name_or_path)
         tokenizer = AutoTokenizer.from_pretrained(args.model_name_or_path,
                                                   trust_remote_code=True)
     elif "internlm" in configs.architectures[0].lower():
