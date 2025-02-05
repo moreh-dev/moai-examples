@@ -38,7 +38,7 @@ The optimized versions of MAF, Torch, and Flavor for each model are as follows:
 | [baichuan-inc/Baichuan-13B-Chat](https://huggingface.co/baichuan-inc/Baichuan-13B-Chat) | `25.1.202`  |    `2.1.0`    | `3.10`         |  `xLarge.512GB`  |     64      |     16     |
 | [internlm/internlm2_5-20b-chat](https://huggingface.co/internlm/internlm2_5-20b-chat) | `25.1.202`  |    `2.1.0`    | `3.10`         | `2xLarge.1024GB` |     64      |     16     |
 | [meta-llama/Meta-Llama-3-8B ](https://huggingface.co/meta-llama/Meta-Llama-3-8B) | `25.1.202`  |    `2.1.0`    | `3.10`         |  `xLarge.512GB`  |     64      |     32     |
-| [meta-llama/Meta-Llama-3-70B-Instuct ](https://huggingface.co/meta-llama/Meta-Llama-3-8B-Instruct) | `25.1.202`  |    `2.1.0`    | `3.10`         | `4xLarge.2048GB` |     256     |     64     |
+| [meta-llama/Meta-Llama-3-70B-Instuct ](https://huggingface.co/meta-llama/Meta-Llama-3-70B-Instruct) | `25.1.202`  |    `2.1.0`    | `3.10`         | `4xLarge.2048GB` |     256     |     64     |
 | [google/gemma-2-27b-it](https://huggingface.co/google/gemma-2-27b-it) | `25.1.202`  |    `2.1.0`    | `3.10`         | `2xLarge.1024GB` |     64      |     32     |
 
 </div>
@@ -95,7 +95,7 @@ By specifying one of the models listed under **example model names** in `{model}
 | [baichuan-inc/Baichuan-13B-Chat](https://huggingface.co/baichuan-inc/Baichuan-13B-Chat) | `baichuan`    |
 | [internlm/internlm2_5-20b-chat](https://huggingface.co/internlm/internlm2_5-20b-chat)   | `internlm`    |
 | [meta-llama/Meta-Llama-3-8B ](https://huggingface.co/meta-llama/Meta-Llama-3-8B)        | `llama_8b`    |
-| [meta-llama/Meta-Llama-3-70B-Instuct ](https://huggingface.co/meta-llama/Meta-Llama-3-8B-Instruct) | `llama_70b` |
+| [meta-llama/Meta-Llama-3-70B-Instuct ](https://huggingface.co/meta-llama/Meta-Llama-3-70B-Instruct) | `llama_70b` |
 | [google/gemma-2-27b-it](https://huggingface.co/google/gemma-2-27b-it)                   | `gemma`       |
 |</div>||
 
