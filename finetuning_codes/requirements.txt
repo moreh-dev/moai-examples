@@ -8,5 +8,5 @@ loguru
 sentencepiece
 openai
 tenacity
-trl
+trl==0.14.0
 einops
