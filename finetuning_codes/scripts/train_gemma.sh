@@ -6,7 +6,7 @@ current_time=$(date +"%y%m%d_%H%M%S")
 TOKENIZERS_PARALLELISM=false TRANSFORMERS_VERBOSITY=info accelerate launch \
     --config_file $CONFIG_PATH \
     train.py \
-    --model gemma/gemma-2-27b-it \
+    --model google/gemma-2-27b-it \
     --dataset bitext/Bitext-customer-support-llm-chatbot-training-dataset \
     --lr 0.000001 \
     --train-batch-size 64 \
