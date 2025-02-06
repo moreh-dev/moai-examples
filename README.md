@@ -29,27 +29,36 @@ The optimized versions of MAF, Torch, and Flavor for each model are as follows:
 
 <div align="center">
 
-|      Model       | MAF Version | Torch Version |      Flavor      | Train Batch | Eval Batch |
-| :--------------: | :---------: | :-----------: | :--------------: | :---------: | :--------: |
-|    [Qwen/Qwen-14B](https://huggingface.co/Qwen/Qwen-14B)    |  `24.9.211` |   `1.13.1`    |  `xLarge.512GB`  |     64      |     8      |
-|    [Qwen/Qwen-72B](https://huggingface.co/Qwen/Qwen-72B)    |  `24.9.211` |   `1.13.1`    | `4xLarge.2048GB` |     256     |     8      |
-|    [Qwen/Qwen2-72B-Instruct](https://huggingface.co/Qwen/Qwen2-72B-Instruct)   |  `24.9.211` |   `1.13.1`    | `4xLarge.2048GB` |     32      |     8      |
-|    [baichuan-inc/Baichuan-13B-Chat](https://huggingface.co/baichuan-inc/Baichuan-13B-Chat)    |  `24.9.211` |   `1.13.1`    |  `xLarge.512GB`  |     64      |     8      |
-|    [internlm/internlm2_5-20b-chat](https://huggingface.co/internlm/internlm2_5-20b-chat)    |  `24.9.212` |   `1.13.1`    | `2xLarge.1024GB` |     64      |     16     |
-|    [meta-llama/Meta-Llama-3-8B ](https://huggingface.co/meta-llama/Meta-Llama-3-8B)   |  `24.9.211` |   `1.13.1`    |  `xLarge.512GB`  |     64      |     8      |
-|    [google/gemma-2-27b-it](https://huggingface.co/google/gemma-2-27b-it)  |  `24.9.211` |   `1.13.1`    | `2xLarge.1024GB` |     64      |     8      |
 
+|                            Model                             | MAF Version | Torch Version | Python Version |      Flavor      | Train Batch | Eval Batch |
+| :----------------------------------------------------------: | :---------: | :-----------: | -------------- | :--------------: | :---------: | :--------: |
+|    [Qwen/Qwen-14B](https://huggingface.co/Qwen/Qwen-14B)     | `25.1.202`  |    `2.1.0`    | `3.10`         |  `xLarge.512GB`  |     64      |     16     |
+|    [Qwen/Qwen-72B](https://huggingface.co/Qwen/Qwen-72B)     | `25.1.202`  |    `2.1.0`    | `3.10`         | `4xLarge.2048GB` |     256     |     8      |
+| [Qwen/Qwen2-72B-Instruct](https://huggingface.co/Qwen/Qwen2-72B-Instruct) | `25.1.202`  |    `2.1.0`    | `3.10`         | `4xLarge.2048GB` |     32      |     32     |
+| [baichuan-inc/Baichuan-13B-Chat](https://huggingface.co/baichuan-inc/Baichuan-13B-Chat) | `25.1.202`  |    `2.1.0`    | `3.10`         |  `xLarge.512GB`  |     64      |     16     |
+| [internlm/internlm2_5-20b-chat](https://huggingface.co/internlm/internlm2_5-20b-chat) | `25.1.202`  |    `2.1.0`    | `3.10`         | `2xLarge.1024GB` |     64      |     16     |
+| [meta-llama/Meta-Llama-3-8B ](https://huggingface.co/meta-llama/Meta-Llama-3-8B) | `25.1.202`  |    `2.1.0`    | `3.10`         |  `xLarge.512GB`  |     64      |     32     |
+| [meta-llama/Meta-Llama-3-70B-Instuct ](https://huggingface.co/meta-llama/Meta-Llama-3-70B-Instruct) | `25.1.202`  |    `2.1.0`    | `3.10`         | `4xLarge.2048GB` |     256     |     64     |
+| [google/gemma-2-27b-it](https://huggingface.co/google/gemma-2-27b-it) | `25.1.202`  |    `2.1.0`    | `3.10`         | `2xLarge.1024GB` |     64      |     32     |
 
 </div>
 
-### Pytorch Installation & MoAI Accelerator
+### Install
+
+[![python](https://img.shields.io/badge/Python-3.10-3776AB.svg?style=flat&logo=python&logoColor=white)](https://www.python.org)
+
+```bash
+pip install torch==2.1.0+moreh25.1.202 torchvision==0.16.0 sympy
+```
+
+### MoAI Accelerator
 
 You can check the current moai version and flavor through `moreh-smi`.
 ```bash
 moreh-smi
 
 +-----------------------------------------------------------------------------------------------+
-|                                          Current Version: 24.9.211  Latest Version: 25.1.201  |
+|                                          Current Version: 25.1.202  Latest Version: 25.1.202  |
 +-----------------------------------------------------------------------------------------------+
 |  Device  |          Name          |  Model  |  Memory Usage  |  Total Memory  |  Utilization  |
 +===============================================================================================+
@@ -86,9 +95,10 @@ By specifying one of the models listed under **example model names** in `{model}
 | [baichuan-inc/Baichuan-13B-Chat](https://huggingface.co/baichuan-inc/Baichuan-13B-Chat) | `baichuan`    |
 | [internlm/internlm2_5-20b-chat](https://huggingface.co/internlm/internlm2_5-20b-chat)   | `internlm`    |
 | [meta-llama/Meta-Llama-3-8B ](https://huggingface.co/meta-llama/Meta-Llama-3-8B)        | `llama_8b`    |
+| [meta-llama/Meta-Llama-3-70B-Instuct ](https://huggingface.co/meta-llama/Meta-Llama-3-70B-Instruct) | `llama_70b` |
 | [google/gemma-2-27b-it](https://huggingface.co/google/gemma-2-27b-it)                   | `gemma`       |
-</div>
 
+</div>
 
 The scripts are as follows:
 
@@ -120,6 +130,12 @@ The above script is based on execution from the `moai-examples/finetuning_codes`
 If modifications are required, please adjust it to fit the client or platform specifications.   
 Additionally, paths such as `CONFIG_PATH` , `SAVE_DIR` and `LOG_DIR` should be updated to match the context of the container in use.
 
+### Inference
+
+
+Please refer to the [inference_codes/README.md](inference_codes/README.md)
+
+
 
 ## **Directory and Code Details**
 
@@ -150,9 +166,23 @@ finetuning_codes
 ├── requirements                  # Folder for additional dependencies or packages required for fine-tuning
 ├── scripts                       # Directory containing shell scripts for different fine-tuning setups
 ├── train.py                      # Main Python script for initiating the fine-tuning process
-├── train_internlm.py             # Fine-tuning code for InternLM training
 └── utils.py                      # Utility functions for train.py/train_internlm.py
 ```
+
+### `inference_codes`
+
+ `inference_codes` directory contains scripts for model inference. 
+
+```bash
+finetuning_codes
+├── agent_client.py            # Python script for model loading
+├── benchmark_client.py        # Python script to evaluate inference performance 
+├── requirements.txt           # Requirements for inference 
+├── chat.py                    # Python script for human evaluation of loaded model
+└── client_utils.py            # Utility functions for chat.py/benchmark_client.py/agent_client.py
+```
+
+
 
 
 ## Learn More

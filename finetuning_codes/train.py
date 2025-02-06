@@ -96,7 +96,7 @@ def main(args):
 
     total_train_steps = (len(dataset["train"]) //
                          (world_size * args.train_batch_size)) * args.num_epochs
-
+    SFTTrainer.get_batch_samples = get_batch_samples
     trainer = SFTTrainer(model,
                          tokenizer=tokenizer,
                          args=trainer_config,

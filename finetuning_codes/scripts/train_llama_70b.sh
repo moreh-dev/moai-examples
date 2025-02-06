@@ -6,14 +6,15 @@ current_time=$(date +"%y%m%d_%H%M%S")
 TOKENIZERS_PARALLELISM=false TRANSFORMERS_VERBOSITY=info accelerate launch \
     --config_file $CONFIG_PATH \
     train.py \
-    --model Qwen/Qwen2-72B-Instruct \
+    --model meta-llama/Meta-Llama-3-70B-Instruct \
     --dataset bitext/Bitext-customer-support-llm-chatbot-training-dataset \
-    --lr 0.000001 \
-    --train-batch-size 32 \
-    --eval-batch-size 32 \
+    --lr 0.0001 \
+    --train-batch-size 256 \
+    --eval-batch-size 64 \
+    --block-size 1024 \
     --num-epochs 5 \
     --max-steps -1 \
-    --log-interval 20 \
+    --log-interval 5 \
     --save-path $SAVE_DIR \
     |& tee $LOG_DIR
 

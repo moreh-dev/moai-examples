@@ -95,7 +95,6 @@ def load_model(args):
     configs = AutoConfig.from_pretrained(args.model_name_or_path,
                                          trust_remote_code=True)
     if "baichuan" in configs.architectures[0].lower():
-        moreh_config.set_config("advanced_parallelization_memory_usage_correction_ratio", 70)
         from model.baichuan.modeling_baichuan import BaichuanForCausalLM
         model = BaichuanForCausalLM.from_pretrained(args.model_name_or_path)
         tokenizer = AutoTokenizer.from_pretrained(args.model_name_or_path,
@@ -105,11 +104,6 @@ def load_model(args):
         moreh_config.set_config("advanced_parallelization_memory_usage_correction_ratio", 70)
         model = AutoModelForCausalLM.from_pretrained(args.model_name_or_path, use_cache = False)
         tokenizer = AutoTokenizer.from_pretrained(args.model_name_or_path)
-    elif "llama" in configs.architectures[0].lower():
-        from model.llama.modeling_llama import LlamaForCausalLM
-        model = LlamaForCausalLM.from_pretrained(args.model_name_or_path)
-        tokenizer = AutoTokenizer.from_pretrained(args.model_name_or_path,
-                                                  trust_remote_code=True)
     elif "internlm" in configs.architectures[0].lower():
         from model.internlm.modeling_internlm2 import InternLM2ForCausalLM
         model = InternLM2ForCausalLM.from_pretrained(args.model_name_or_path,
@@ -118,8 +112,6 @@ def load_model(args):
         tokenizer = AutoTokenizer.from_pretrained(args.model_name_or_path,
                                                   trust_remote_code=True)
     elif "qwen" in configs.architectures[0].lower() and "qwen2" not in configs.architectures[0].lower():
-        if "14" in args.model_name_or_path.lower():
-            moreh_config.set_config("advanced_parallelization_memory_usage_correction_ratio", 70)
         model = AutoModelForCausalLM.from_pretrained(args.model_name_or_path,
                                                      trust_remote_code=True,
                                                      torch_dtype='float32', fp32=True)
@@ -575,6 +567,31 @@ def set_mem_usage_correction_ratio(args):
         moreh_config.set_config(
             "advanced_parallelization_memory_usage_correction_ratio",
             args.memory_usage_correction_ratio)
+
+def get_batch_samples(self, epoch_iterator, num_batches):
+    batch_samples = []
+    num_items_in_batch = None
+    for _ in range(num_batches):
+        try:
+            batch_samples += [next(epoch_iterator)]
+        except StopIteration:
+            break
+
+    if len(batch_samples) > 0 and "labels" in batch_samples[0]:
+        # For now we don't support object detection
+        try:
+            num_items_in_batch = sum([(batch["labels"].ne(-100)).sum() for batch in batch_samples])
+        except (TypeError, AttributeError):
+            pass
+
+    if self.args.average_tokens_across_devices and num_items_in_batch is not None:
+        num_items_in_batch = self.accelerator.gather(num_items_in_batch).sum().item()
+
+    if torch.is_tensor(num_items_in_batch):
+        num_items_in_batch = num_items_in_batch
+
+    return batch_samples, num_items_in_batch
+
 
 
 class TrainCallback(TrainerCallback):
