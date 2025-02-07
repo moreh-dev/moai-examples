@@ -7,8 +7,8 @@ TOKENIZERS_PARALLELISM=false TRANSFORMERS_VERBOSITY=info accelerate launch \
     --config_file $CONFIG_PATH \
     train.py \
     --model Qwen/Qwen-72B \
-    --dataset alespalla/chatbot_instruction_prompts \
-    --lr 0.0001 \
+    --dataset bitext/Bitext-customer-support-llm-chatbot-training-dataset \
+    --lr 0.00001 \
     --train-batch-size 256 \
     --eval-batch-size 8 \
     --num-epochs 5 \
