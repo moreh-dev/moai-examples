@@ -8,7 +8,7 @@ TOKENIZERS_PARALLELISM=false TRANSFORMERS_VERBOSITY=info accelerate launch \
     train.py \
     --model Qwen/Qwen2-72B-Instruct \
     --dataset bitext/Bitext-customer-support-llm-chatbot-training-dataset \
-    --lr 0.000001 \
+    --lr 0.00001 \
     --train-batch-size 32 \
     --eval-batch-size 32 \
     --num-epochs 5 \

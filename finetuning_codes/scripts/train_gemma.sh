@@ -8,7 +8,7 @@ TOKENIZERS_PARALLELISM=false TRANSFORMERS_VERBOSITY=info accelerate launch \
     train.py \
     --model google/gemma-2-27b-it \
     --dataset bitext/Bitext-customer-support-llm-chatbot-training-dataset \
-    --lr 0.000001 \
+    --lr 0.00001 \
     --train-batch-size 64 \
     --eval-batch-size 32 \
     --block-size 1024 \
