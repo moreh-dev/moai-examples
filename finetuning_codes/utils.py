@@ -117,6 +117,12 @@ def load_model(args):
                                                      torch_dtype='float32', fp32=True)
         tokenizer = AutoTokenizer.from_pretrained("Qwen/Qwen-tokenizer",
                                                   trust_remote_code=True)
+    elif "chatglm" in configs.architectures[0].lower():
+        from model.chatglm3.modeling_chatglm import ChatGLMForConditionalGeneration
+        model = ChatGLMForConditionalGeneration.from_pretrained(args.model_name_or_path,
+                                                     trust_remote_code=True)
+        tokenizer = AutoTokenizer.from_pretrained(args.model_name_or_path,
+                                                     trust_remote_code=True)
     else:
         model = AutoModelForCausalLM.from_pretrained(args.model_name_or_path, use_cache = False)
         tokenizer = AutoTokenizer.from_pretrained(args.model_name_or_path)
