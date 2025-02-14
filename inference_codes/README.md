@@ -19,6 +19,7 @@ pip install -r requirements.txt
 | [THUDM/chatglm3-6b-32k](https://huggingface.co/THUDM/chatglm3-6b-32k)               |
 | [Qwen/Qwen2.5-32B-Instruct-GPTQ-Int8](https://huggingface.co/Qwen/Qwen2.5-32B-Instruct-GPTQ-Int8) |
 | [THUDM/chatglm3-6b](https://huggingface.co/THUDM/chatglm3-6b) |
+| [mistralai/Mistral-7B-v0.3](https://huggingface.co/mistralai/Mistral-7B-v0.3) | 
 
 </div>
 
