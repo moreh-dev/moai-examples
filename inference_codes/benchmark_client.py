@@ -398,7 +398,10 @@ def main(args: argparse.Namespace):
         if args.num_prompts == 1:
             maximum_generation_tps = df.sort_values(by = ["Running", "generation_tps"], ascending=False).iloc[0]["generation_tps"]
         else:
-            maximum_generation_tps = df[(df["prompt_tps"] == 0)].sort_values(by = ["Running", "generation_tps"], ascending=False).iloc[0]["generation_tps"]
+            if (df["prompt_tps"] == 0).any():
+                maximum_generation_tps = df[(df["prompt_tps"] == 0)].sort_values(by = ["Running", "generation_tps"], ascending=False).iloc[0]["generation_tps"]
+            else:
+                maximum_generation_tps = df["generation_tps"].max()
         max_generation_tps_list.append(maximum_generation_tps)
         maximum_running_req = df["Running"].max()
         max_running_request_list.append(maximum_running_req)
