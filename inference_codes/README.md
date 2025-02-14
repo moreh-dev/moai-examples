@@ -18,6 +18,7 @@ pip install -r requirements.txt
 | [google/gemma-2-27b-it](https://huggingface.co/google/gemma-2-27b-it)               |
 | [THUDM/chatglm3-6b-32k](https://huggingface.co/THUDM/chatglm3-6b-32k)               |
 | [Qwen/Qwen2.5-32B-Instruct-GPTQ-Int8](https://huggingface.co/Qwen/Qwen2.5-32B-Instruct-GPTQ-Int8) |
+| [THUDM/chatglm3-6b](https://huggingface.co/THUDM/chatglm3-6b) |
 
 </div>
 

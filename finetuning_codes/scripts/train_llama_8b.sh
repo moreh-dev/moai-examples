@@ -8,7 +8,7 @@ TOKENIZERS_PARALLELISM=false TRANSFORMERS_VERBOSITY=info accelerate launch \
     train.py \
     --model meta-llama/Meta-Llama-3-8B \
     --dataset bitext/Bitext-customer-support-llm-chatbot-training-dataset \
-    --lr 0.0001 \
+    --lr 0.00001 \
     --train-batch-size 64 \
     --eval-batch-size 32 \
     --block-size 1024 \
