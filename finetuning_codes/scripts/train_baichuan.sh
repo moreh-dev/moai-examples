@@ -3,10 +3,8 @@
 START_TIME=$(TZ="Asia/Seoul" date)
 current_time=$(date +"%y%m%d_%H%M%S")
 
-TOKENIZERS_PARALLELISM=false TRANSFORMERS_VERBOSITY=info accelerate launch \
-    --config_file $CONFIG_PATH \
-    train.py \
-    --model baichuan-inc/Baichuan-13B-Chat  \
+python train.py \
+    --model baichuan-inc/Baichuan-13B-Chat \
     --dataset bitext/Bitext-customer-support-llm-chatbot-training-dataset \
     --lr 0.00001 \
     --train-batch-size 64 \

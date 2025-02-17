@@ -536,7 +536,7 @@ def get_batch_samples(self, epoch_iterator, num_batches):
 
 class TrainCallback(TrainerCallback):
 
-    def __init__(self, batch_size, world_size, warm_up_st, total_steps):
+    def __init__(self, batch_size, block_size, warm_up_st, total_steps):
         self.duration_st = None
         self.duration_ed = None
         self.step_st = None
@@ -549,7 +549,7 @@ class TrainCallback(TrainerCallback):
         self.step_tps = 0
         self.elapsed_times = []
         self.total_train_steps = total_steps
-        self.world_size = world_size
+        self.block_size = block_size
 
     def on_train_begin(self, args, state, control, **kwargs):
         self.start = time.time()
@@ -573,8 +573,7 @@ class TrainCallback(TrainerCallback):
             self.accum = 0
         else:
             duration = time.time() - self.start
-            tps = (args.max_seq_length * self.batch_size * self.accum *
-                   self.world_size) / duration
+            tps = (self.block_size * self.batch_size * self.accum) / duration
             if 'loss' in logs:
                 loss = logs['loss']
                 lr = logs['learning_rate']
