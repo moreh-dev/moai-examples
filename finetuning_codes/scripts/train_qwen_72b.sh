@@ -11,6 +11,7 @@ TOKENIZERS_PARALLELISM=false TRANSFORMERS_VERBOSITY=info accelerate launch \
     --lr 0.00001 \
     --train-batch-size 256 \
     --eval-batch-size 8 \
+    --block-size 1024 \
     --num-epochs 5 \
     --max-steps -1 \
     --log-interval 20 \

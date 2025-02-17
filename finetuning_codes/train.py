@@ -2,21 +2,12 @@ import argparse
 import copy
 import time
 
-from accelerate import Accelerator
-from accelerate.logging import get_logger
 import datasets
 from datasets import load_dataset
-from peft import get_peft_model
-from peft import LoraConfig
+from loguru import logger
 import torch
-from torch.distributed.fsdp import FullStateDictConfig
-from torch.distributed.fsdp import FullyShardedDataParallel as FSDP
-from torch.distributed.fsdp import StateDictType
-from tqdm.auto import tqdm
 import transformers
-from transformers import AutoTokenizer
-from trl import SFTConfig
-from trl import SFTTrainer
+from transformers import Trainer, TrainingArguments
 from utils import *
 
 
@@ -52,31 +43,21 @@ def arg_parse():
 def main(args):
     torch.moreh.option.enable_advanced_parallelization()
 
-    accelerator = Accelerator()
-    world_size = accelerator.num_processes
+    datasets.utils.logging.set_verbosity_warning()
+    transformers.utils.logging.set_verbosity_info()
     logger = get_logger(__name__)
-    logger.info(accelerator.state, main_process_only=True)
-    logger.warning(accelerator.state, main_process_only=True)
-
-    if accelerator.is_local_main_process:
-        datasets.utils.logging.set_verbosity_warning()
-        transformers.utils.logging.set_verbosity_info()
-    else:
-        datasets.utils.logging.set_verbosity_error()
-        transformers.utils.logging.set_verbosity_error()
 
     model, tokenizer = load_model(args)
     dataset = load_custom_dataset(args)
     dataset = preprocess_dataset(args, dataset, tokenizer)
 
     # SFTConfig
-    trainer_config = SFTConfig(
+    trainer_config = TrainingArguments(
         num_train_epochs=args.num_epochs,
         max_steps=args.max_steps,
         per_device_train_batch_size=args.train_batch_size,
         per_device_eval_batch_size=args.eval_batch_size,
         output_dir=args.save_path,
-        max_seq_length=args.block_size,
         optim='adamw_torch',
         lr_scheduler_type="cosine",
         learning_rate=args.lr,
@@ -87,7 +68,6 @@ def main(args):
         report_to='none',
         logging_nan_inf_filter=False,
         save_strategy="no",
-        max_grad_norm=0,
         logging_first_step=True,
         dataloader_drop_last=True
     )
@@ -95,25 +75,23 @@ def main(args):
     warm_up_st = time.time()
 
     total_train_steps = (len(dataset["train"]) //
-                         (world_size * args.train_batch_size)) * args.num_epochs
-    SFTTrainer.get_batch_samples = get_batch_samples
-    trainer = SFTTrainer(model,
-                         tokenizer=tokenizer,
-                         args=trainer_config,
-                         train_dataset=dataset['train'],
-                         eval_dataset=dataset['validation'],
-                         callbacks=[
-                             TrainCallback(
-                                 batch_size=args.train_batch_size,
-                                 world_size=world_size,
-                                 warm_up_st=warm_up_st,
-                                 total_steps=total_train_steps,
-                             )
-                         ])
+                        (args.train_batch_size)) * args.num_epochs
+    trainer = Trainer(model,
+                        tokenizer=tokenizer,
+                        args=trainer_config,
+                        train_dataset=dataset['train'],
+                        eval_dataset=dataset['validation'],
+                        callbacks=[
+                        TrainCallback(
+                        batch_size=args.train_batch_size,
+                        block_size=args.block_size,
+                        warm_up_st=warm_up_st,
+                        total_steps=total_train_steps,
+                        )
+                        ])
     trainer.train()
-    trainer.save_state()
-    unwrapped_model = accelerator.unwrap_model(model)
-    save_model_and_tokenizer(args, unwrapped_model, tokenizer)
+    trainer.save_model(args.save_path)
+    # save_model_and_tokenizer(args, unwrapped_model, tokenizer)
 
 
 if __name__ == "__main__":
