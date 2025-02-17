@@ -41,6 +41,7 @@ The optimized versions of MAF, Torch, and Flavor for each model are as follows:
 | [meta-llama/Meta-Llama-3-70B-Instuct ](https://huggingface.co/meta-llama/Meta-Llama-3-70B-Instruct) | `25.1.202`  |    `2.1.0`    | `3.10`         | `4xLarge.2048GB` |     256     |     64     |
 | [google/gemma-2-27b-it](https://huggingface.co/google/gemma-2-27b-it) | `25.1.202`  |    `2.1.0`    | `3.10`         | `2xLarge.1024GB` |     64      |     32     |
 | [THUDM/chatglm3-6b](https://huggingface.co/THUDM/chatglm3-6b) | `25.1.202`  |    `2.1.0`    | `3.10`         | `xLarge.512GB` |     64      |     16     |
+| [mistralai/Mistral-7B-v0.3](https://huggingface.co/mistralai/Mistral-7B-v0.3) | `25.1.202`  |    `2.1.0`    | `3.10`         | `xLarge.512GB` |     64      |     32     |
 
 </div>
 
@@ -99,6 +100,7 @@ By specifying one of the models listed under **example model names** in `{model}
 | [meta-llama/Meta-Llama-3-70B-Instuct ](https://huggingface.co/meta-llama/Meta-Llama-3-70B-Instruct) | `llama_70b` |
 | [google/gemma-2-27b-it](https://huggingface.co/google/gemma-2-27b-it)                   | `gemma`       |
 | [THUDM/chatglm3-6b](https://huggingface.co/THUDM/chatglm3-6b)                   | `chatglm`       |
+| [mistralai/Mistral-7B-v0.3](https://huggingface.co/mistralai/Mistral-7B-v0.3) | `mistral_7b`   |
 
 </div>
 
