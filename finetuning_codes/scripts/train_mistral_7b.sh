@@ -4,7 +4,7 @@ START_TIME=$(TZ="Asia/Seoul" date)
 current_time=$(date +"%y%m%d_%H%M%S")
 
 TOKENIZERS_PARALLELISM=false TRANSFORMERS_VERBOSITY=info accelerate launch \
-    --config_file $CONFG_PATH \
+    --config_file $CONFIG_PATH \
     train.py \
     --model mistralai/Mistral-7B-v0.3 \
     --dataset bitext/Bitext-customer-support-llm-chatbot-training-dataset \
