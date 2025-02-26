@@ -39,6 +39,7 @@ The optimized versions of MAF, Torch, and Flavor for each model are as follows:
 | [internlm/internlm2_5-20b-chat](https://huggingface.co/internlm/internlm2_5-20b-chat) | `25.1.202`  |    `2.1.0`    | `3.10`         | `2xLarge.1024GB` |     64      |     16     |
 | [meta-llama/Meta-Llama-3-8B ](https://huggingface.co/meta-llama/Meta-Llama-3-8B) | `25.1.202`  |    `2.1.0`    | `3.10`         |  `xLarge.512GB`  |     64      |     32     |
 | [meta-llama/Meta-Llama-3-70B-Instuct ](https://huggingface.co/meta-llama/Meta-Llama-3-70B-Instruct) | `25.1.202`  |    `2.1.0`    | `3.10`         | `4xLarge.2048GB` |     256     |     64     |
+| [meta-llama/Meta-Llama-3-70B-Instuct ](https://huggingface.co/meta-llama/Meta-Llama-3-70B-Instruct) (with LoRA) | `25.1.202`  |    `2.1.0`    | `3.10`         | `xLarge.512GB` |     16     |     16     |
 | [google/gemma-2-27b-it](https://huggingface.co/google/gemma-2-27b-it) | `25.1.202`  |    `2.1.0`    | `3.10`         | `2xLarge.1024GB` |     64      |     32     |
 | [THUDM/chatglm3-6b](https://huggingface.co/THUDM/chatglm3-6b) | `25.1.202`  |    `2.1.0`    | `3.10`         | `xLarge.512GB` |     64      |     16     |
 | [mistralai/Mistral-7B-v0.3](https://huggingface.co/mistralai/Mistral-7B-v0.3) | `25.1.202`  |    `2.1.0`    | `3.10`         | `xLarge.512GB` |     64      |     32     |
@@ -98,6 +99,7 @@ By specifying one of the models listed under **example model names** in `{model}
 | [internlm/internlm2_5-20b-chat](https://huggingface.co/internlm/internlm2_5-20b-chat)   | `internlm`    |
 | [meta-llama/Meta-Llama-3-8B ](https://huggingface.co/meta-llama/Meta-Llama-3-8B)        | `llama_8b`    |
 | [meta-llama/Meta-Llama-3-70B-Instuct ](https://huggingface.co/meta-llama/Meta-Llama-3-70B-Instruct) | `llama_70b` |
+| [meta-llama/Meta-Llama-3-70B-Instuct ](https://huggingface.co/meta-llama/Meta-Llama-3-70B-Instruct) (with LoRA) | `llama_70b_lora` |
 | [google/gemma-2-27b-it](https://huggingface.co/google/gemma-2-27b-it)                   | `gemma`       |
 | [THUDM/chatglm3-6b](https://huggingface.co/THUDM/chatglm3-6b)                   | `chatglm`       |
 | [mistralai/Mistral-7B-v0.3](https://huggingface.co/mistralai/Mistral-7B-v0.3) | `mistral_7b`   |
