@@ -76,7 +76,7 @@ def main(args):
 
     total_train_steps = (len(dataset["train"]) //
                         (args.train_batch_size)) * args.num_epochs
-    Trainer.get_batch_sample = get_batch_sample
+    Trainer.get_batch_samples = get_batch_samples
     trainer = Trainer(model,
                         tokenizer=tokenizer,
                         args=trainer_config,
