@@ -9,4 +9,5 @@ sentencepiece
 openai
 tenacity
 trl==0.14.0
+accelerate==1.4.0
 einops
