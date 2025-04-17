@@ -36,18 +36,18 @@ The optimized versions of MAF, Torch, and Flavor for each model are as follows:
 
 |                            Model                             | MAF Version | Torch Version | Python Version |       Flavor        | Train Batch | Eval Batch |
 | :----------------------------------------------------------: | :---------: | :-----------: | -------------- | :-----------------: | :---------: | :--------: |
-|    [Qwen/Qwen-14B](https://huggingface.co/Qwen/Qwen-14B)     | `25.1.202`  |    `2.1.0`    | `3.10`         | `flavor-default-8`  |     64      |     16     |
-|    [Qwen/Qwen-72B](https://huggingface.co/Qwen/Qwen-72B)     | `25.1.202`  |    `2.1.0`    | `3.10`         | `flavor-default-32` |     256     |     8      |
-| [Qwen/Qwen2-72B-Instruct](https://huggingface.co/Qwen/Qwen2-72B-Instruct) | `25.1.202`  |    `2.1.0`    | `3.10`         | `flavor-default-32` |     32      |     32     |
-| [baichuan-inc/Baichuan-13B-Chat](https://huggingface.co/baichuan-inc/Baichuan-13B-Chat) | `25.1.202`  |    `2.1.0`    | `3.10`         | `flavor-default-8`  |     64      |     16     |
-| [baichuan-inc/Baichuan2-13B-Chat](https://huggingface.co/baichuan-inc/Baichuan2-13B-Chat) | `25.3.211`  |    `2.1.0`    | `3.10`         | `flavor-default-8`  |     64      |     16     |
-| [internlm/internlm2_5-20b-chat](https://huggingface.co/internlm/internlm2_5-20b-chat) | `25.1.202`  |    `2.1.0`    | `3.10`         | `flavor-default-16` |     64      |     16     |
-| [meta-llama/Meta-Llama-3-8B ](https://huggingface.co/meta-llama/Meta-Llama-3-8B) | `25.1.202`  |    `2.1.0`    | `3.10`         | `flavor-default-8`  |     64      |     32     |
-| [meta-llama/Meta-Llama-3-70B-Instuct ](https://huggingface.co/meta-llama/Meta-Llama-3-70B-Instruct) | `25.1.202`  |    `2.1.0`    | `3.10`         | `flavor-default-32` |     256     |     64     |
-| [meta-llama/Meta-Llama-3-70B-Instuct ](https://huggingface.co/meta-llama/Meta-Llama-3-70B-Instruct) (with LoRA) | `25.1.202`  |    `2.1.0`    | `3.10`         | `flavor-default-8`  |     16      |     16     |
-| [google/gemma-2-27b-it](https://huggingface.co/google/gemma-2-27b-it) | `25.1.202`  |    `2.1.0`    | `3.10`         | `flavor-default-16` |     32      |     16     |
-| [THUDM/chatglm3-6b](https://huggingface.co/THUDM/chatglm3-6b) | `25.1.202`  |    `2.1.0`    | `3.10`         | `flavor-default-8`  |     64      |     16     |
-| [mistralai/Mistral-7B-v0.3](https://huggingface.co/mistralai/Mistral-7B-v0.3) | `25.1.202`  |    `2.1.0`    | `3.10`         | `flavor-default-8`  |     64      |     32     |
+|    [Qwen/Qwen-14B](https://huggingface.co/Qwen/Qwen-14B)     | `25.3.208`  |    `2.1.0`    | `3.10`         | `flavor-default-8`  |     64      |     16     |
+|    [Qwen/Qwen-72B](https://huggingface.co/Qwen/Qwen-72B)     | `25.3.208`  |    `2.1.0`    | `3.10`         | `flavor-default-32` |     256     |     8      |
+| [Qwen/Qwen2-72B-Instruct](https://huggingface.co/Qwen/Qwen2-72B-Instruct) | `25.3.208`  |    `2.1.0`    | `3.10`         | `flavor-default-32` |     32      |     32     |
+| [baichuan-inc/Baichuan-13B-Chat](https://huggingface.co/baichuan-inc/Baichuan-13B-Chat) | `25.3.208`  |    `2.1.0`    | `3.10`         | `flavor-default-8`  |     64      |     16     |
+| [baichuan-inc/Baichuan2-13B-Chat](https://huggingface.co/baichuan-inc/Baichuan2-13B-Chat) | `25.3.208`  |    `2.1.0`    | `3.10`         | `flavor-default-8`  |     64      |     16     |
+| [internlm/internlm2_5-20b-chat](https://huggingface.co/internlm/internlm2_5-20b-chat) | `25.3.208`  |    `2.1.0`    | `3.10`         | `flavor-default-16` |     64      |     16     |
+| [meta-llama/Meta-Llama-3-8B ](https://huggingface.co/meta-llama/Meta-Llama-3-8B) | `25.3.208`  |    `2.1.0`    | `3.10`         | `flavor-default-8`  |     64      |     32     |
+| [meta-llama/Meta-Llama-3-70B-Instuct ](https://huggingface.co/meta-llama/Meta-Llama-3-70B-Instruct) | `25.3.208`  |    `2.1.0`    | `3.10`         | `flavor-default-32` |     256     |     64     |
+| [meta-llama/Meta-Llama-3-70B-Instuct ](https://huggingface.co/meta-llama/Meta-Llama-3-70B-Instruct) (with LoRA) | `25.3.208`  |    `2.1.0`    | `3.10`         | `flavor-default-8`  |     16      |     16     |
+| [google/gemma-2-27b-it](https://huggingface.co/google/gemma-2-27b-it) | `25.3.208`  |    `2.1.0`    | `3.10`         | `flavor-default-16` |     32      |     16     |
+| [THUDM/chatglm3-6b](https://huggingface.co/THUDM/chatglm3-6b) | `25.3.208`  |    `2.1.0`    | `3.10`         | `flavor-default-8`  |     64      |     16     |
+| [mistralai/Mistral-7B-v0.3](https://huggingface.co/mistralai/Mistral-7B-v0.3) | `25.3.208`  |    `2.1.0`    | `3.10`         | `flavor-default-8`  |     64      |     32     |
 
 </div>
 
@@ -58,7 +58,7 @@ The optimized versions of MAF, Torch, and Flavor for each model are as follows:
 You can install another version of MAF using the command below.
 
 ```bash
-pip install torch==2.1.0+moreh25.4.3005 torchvision==0.16.0+cpu
+pip install torch==2.1.0+moreh25.3.208 torchvision==0.16.0+cpu
 ```
 
 ### MoAI Accelerator
@@ -122,23 +122,36 @@ The scripts are as follows:
 
 ```bash
 #!/bin/bash
-# example of train_qwen_14b.sh
-START_TIME=$(TZ="Asia/Seoul" date)
-current_time=$(date +"%y%m%d_%H%M%S")
+# example of llama3_8b
 
-TRANSFORMERS_VERBOSITY=info accelerate launch \
+START_TIME=$(TZ="Asia/Seoul" date)
+CURR_TIME=$(date +"%y%m%d_%H%M%S")
+
+CONFIG_PATH=config.yaml
+MODEL=/root/models/llama3_8b
+SAVE_DIR=../checkpoints/llama3_8b
+LOG_DIR=logs
+
+mkdir -p $SAVE_DIR $LOG_DIR
+
+export ACCELERATOR_PLATFORM_FLAVOR=flavor-default-8
+export TOKENIZERS_PARALLELISM=false
+export TRANSFORMERS_VERBOSITY=info
+
+accelerate launch \
     --config_file $CONFIG_PATH \
     train.py \
-    --model Qwen/Qwen-14B \
-    --dataset alespalla/chatbot_instruction_prompts \
-    --lr 0.0001 \
+    --model $MODEL \
+    --dataset bitext/Bitext-customer-support-llm-chatbot-training-dataset \
+    --lr 0.00001 \
     --train-batch-size 64 \
-    --eval-batch-size 16 \
+    --eval-batch-size 32 \
+    --block-size 1024 \
     --num-epochs 5 \
     --max-steps -1 \
     --log-interval 20 \
     --save-path $SAVE_DIR \
-    |& tee $LOG_DIR
+    |& tee $LOG_DIR/$CURR_TIME.log
 
 echo "Start: $START_TIME"
 echo "End: $(TZ="Asia/Seoul" date)"
