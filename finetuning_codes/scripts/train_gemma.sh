@@ -20,8 +20,8 @@ accelerate launch \
     --model $MODEL \
     --dataset bitext/Bitext-customer-support-llm-chatbot-training-dataset \
     --lr 0.00001 \
-    --train-batch-size 64 \
-    --eval-batch-size 32 \
+    --train-batch-size 32 \
+    --eval-batch-size 16 \
     --block-size 1024 \
     --num-epochs 5 \
     --max-steps -1 \
