@@ -70,7 +70,7 @@ ap-smi
 
 +-----------------------------------------------------------------------------+
 |                                     Accelerator platform Version : v0.0.30  |
-|              MoAI Framework Version : 25.4.3005 Latest Version : 25.4.3005  |
+|               MoAI Framework Version : 25.3.208 Latest Version : 25.3.208   |
 +---------+---------+------------------------+----------------+---------------+
 |      #  |  NAME   |  FLAVOR                |  MEM USAGE(%)  |  GPU UTIL(%)  |
 +---------+---------+------------------------+----------------+---------------+
@@ -128,7 +128,7 @@ START_TIME=$(TZ="Asia/Seoul" date)
 CURR_TIME=$(date +"%y%m%d_%H%M%S")
 
 CONFIG_PATH=config.yaml
-MODEL=/root/models/llama3_8b
+MODEL=meta-llama/Meta-Llama-3-8B
 SAVE_DIR=../checkpoints/llama3_8b
 LOG_DIR=logs
 
