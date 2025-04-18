@@ -202,15 +202,11 @@ finetuning_codes
 
 ### `inference_codes`
 
- `inference_codes` directory contains scripts for model inference. 
+ `inference_codes` directory contains guide for model inference. 
 
 ```bash
-finetuning_codes
-├── agent_client.py            # Python script for model loading
-├── benchmark_client.py        # Python script to evaluate inference performance 
-├── requirements.txt           # Requirements for inference 
-├── chat.py                    # Python script for human evaluation of loaded model
-└── client_utils.py            # Utility functions for chat.py/benchmark_client.py/agent_client.py
+inference_codes
+└── README.md           # Guide for model inference using MoAI Platform 
 ```
 
 
