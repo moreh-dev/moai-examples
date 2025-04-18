@@ -11,3 +11,4 @@ tenacity
 trl==0.16.0
 accelerate==1.6.0
 einops
+torchvision==0.16.0+cpu

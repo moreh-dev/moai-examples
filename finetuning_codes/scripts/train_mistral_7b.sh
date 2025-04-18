@@ -1,12 +1,23 @@
 #!/bin/bash
 
 START_TIME=$(TZ="Asia/Seoul" date)
-current_time=$(date +"%y%m%d_%H%M%S")
+CURR_TIME=$(date +"%y%m%d_%H%M%S")
 
-TOKENIZERS_PARALLELISM=false TRANSFORMERS_VERBOSITY=info accelerate launch \
+CONFIG_PATH=config.yaml
+MODEL=mistralai/Mistral-7B-v0.3
+SAVE_DIR=../checkpoints/Mistral-7B-v0.3
+LOG_DIR=logs
+
+mkdir -p $SAVE_DIR $LOG_DIR
+
+export ACCELERATOR_PLATFORM_FLAVOR=flavor-default-8
+export TOKENIZERS_PARALLELISM=false
+export TRANSFORMERS_VERBOSITY=info
+
+accelerate launch \
     --config_file $CONFIG_PATH \
     train.py \
-    --model mistralai/Mistral-7B-v0.3 \
+    --model $MODEL \
     --dataset bitext/Bitext-customer-support-llm-chatbot-training-dataset \
     --lr 0.00001 \
     --train-batch-size 64 \
@@ -16,7 +27,7 @@ TOKENIZERS_PARALLELISM=false TRANSFORMERS_VERBOSITY=info accelerate launch \
     --max-steps -1 \
     --log-interval 20 \
     --save-path $SAVE_DIR \
-    |& tee $LOG_DIR
+    |& tee $LOG_DIR/$CURR_TIME.log
 
 echo "Start: $START_TIME"
 echo "End: $(TZ="Asia/Seoul" date)"
