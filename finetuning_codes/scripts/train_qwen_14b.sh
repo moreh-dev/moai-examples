@@ -4,7 +4,7 @@ START_TIME=$(TZ="Asia/Seoul" date)
 CURR_TIME=$(date +"%y%m%d_%H%M%S")
 
 CONFIG_PATH=config.yaml
-MODEL=/root/models/Qwen-14B
+MODEL=Qwen/Qwen-14B
 SAVE_DIR=../checkpoints/Qwen-14B
 LOG_DIR=logs
 

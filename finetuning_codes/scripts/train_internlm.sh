@@ -4,7 +4,7 @@ START_TIME=$(TZ="Asia/Seoul" date)
 CURR_TIME=$(date +"%y%m%d_%H%M%S")
 
 CONFIG_PATH=config.yaml
-MODEL=/root/models/internlm2_5-20b-chat
+MODEL=internlm/internlm2_5-20b-chat
 SAVE_DIR=../checkpoints/internlm2_5-20b-chat
 LOG_DIR=logs
 

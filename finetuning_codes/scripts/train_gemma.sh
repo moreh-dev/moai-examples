@@ -4,7 +4,7 @@ START_TIME=$(TZ="Asia/Seoul" date)
 CURR_TIME=$(date +"%y%m%d_%H%M%S")
 
 CONFIG_PATH=config.yaml
-MODEL=/root/models/gemma-2-27b-it
+MODEL=/google/gemma-2-27b-it
 SAVE_DIR=../checkpoints/gemma-2-27b-it
 LOG_DIR=logs
 

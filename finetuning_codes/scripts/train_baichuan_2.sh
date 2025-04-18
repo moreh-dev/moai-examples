@@ -4,7 +4,7 @@ START_TIME=$(TZ="Asia/Seoul" date)
 CURR_TIME=$(date +"%y%m%d_%H%M%S")
 
 CONFIG_PATH=config.yaml
-MODEL=/root/models/Baichuan2-13B-Chat
+MODEL=baichuan-inc/Baichuan2-13B-Chat
 SAVE_DIR=../checkpoints/baichuan2
 LOG_DIR=logs
 

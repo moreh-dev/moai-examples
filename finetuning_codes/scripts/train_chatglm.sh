@@ -4,7 +4,7 @@ START_TIME=$(TZ="Asia/Seoul" date)
 CURR_TIME=$(date +"%y%m%d_%H%M%S")
 
 CONFIG_PATH=config.yaml
-MODEL=/root/models/chatglm3-6b
+MODEL=THUDM/chatglm3-6b
 SAVE_DIR=../checkpoints/chatglm3-6b
 LOG_DIR=logs
 
