@@ -15,7 +15,7 @@ export TOKENIZERS_PARALLELISM=false
 export TRANSFORMERS_VERBOSITY=info
 
 accelerate launch --config_file $CONFIG_PATH \
-    /root/moai-examples/finetuning_codes/train.py \
+    train.py \
     --model-name-or-path $MODEL \
     --dataset bitext/Bitext-customer-support-llm-chatbot-training-dataset \
     --lr 0.00001 \
