@@ -4,8 +4,7 @@ START_TIME=$(TZ="Asia/Seoul" date)
 CURR_TIME=$(date +"%y%m%d_%H%M%S")
 
 CONFIG_PATH=config.yaml
-#MODEL=meta-llama/Meta-Llama-2-70b-hf
-MODEL=/root/models/Llama-2-70b-chat-hf 
+MODEL=meta-llama/Meta-Llama-2-70b-hf
 SAVE_DIR=../checkpoints/llama2-70b-instruct
 LOG_DIR=logs
 
