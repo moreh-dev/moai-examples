@@ -576,6 +576,13 @@ class TrainCallback(TrainerCallback):
             eval_duration = self.eval_ed - self.eval_st
         else:
             eval_duration = 0
+        if len(self.tps) == 0:
+            duration = time.time() - self.start
+            tps = (self.block_size * self.batch_size * self.accum) / duration
+            self.tps.append(tps)
+            self.elapsed_times.append(duration)
+        self.accum = 0
+        self.start = time.time()
         avg_tps = sum(self.tps) / len(self.tps)
         avg_time_per_1_step = sum(self.elapsed_times) / (
             len(self.elapsed_times) * args.logging_steps - 1)

@@ -4,15 +4,15 @@ START_TIME=$(TZ="Asia/Seoul" date)
 CURR_TIME=$(date +"%y%m%d_%H%M%S")
 
 CONFIG_PATH=config.yaml
-MODEL=/google/gemma-2-27b-it
-SAVE_DIR=../checkpoints/gemma-2-27b-it
+MODEL=meta-llama/Meta-Llama-3-8B-Instruct
+SAVE_DIR=../checkpoints/llama3-8b-instruct
 LOG_DIR=logs
 
 mkdir -p $SAVE_DIR $LOG_DIR
 
-export ACCELERATOR_PLATFORM_FLAVOR=flavor-default-16
 export TOKENIZERS_PARALLELISM=false
 export TRANSFORMERS_VERBOSITY=info
+export ACCELERATOR_PLATFORM_FLAVOR=flavor-default-8
 
 accelerate launch \
     --config_file $CONFIG_PATH \
@@ -20,10 +20,10 @@ accelerate launch \
     --model $MODEL \
     --dataset bitext/Bitext-customer-support-llm-chatbot-training-dataset \
     --lr 0.00001 \
-    --train-batch-size 32 \
-    --eval-batch-size 16 \
+    --train-batch-size 64 \
+    --eval-batch-size 32 \
     --block-size 1024 \
-    --num-epochs 5 \
+    --num-epochs 1 \
     --max-steps -1 \
     --log-interval 20 \
     --save-path $SAVE_DIR \

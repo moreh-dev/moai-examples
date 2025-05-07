@@ -4,8 +4,8 @@ START_TIME=$(TZ="Asia/Seoul" date)
 CURR_TIME=$(date +"%y%m%d_%H%M%S")
 
 CONFIG_PATH=config.yaml
-MODEL=mistralai/Mistral-7B-v0.3
-SAVE_DIR=../checkpoints/Mistral-7B-v0.3
+MODEL=meta-llama/Llama-2-7b-chat-hf
+SAVE_DIR=../checkpoints/llama2-7b-instruct
 LOG_DIR=logs
 
 mkdir -p $SAVE_DIR $LOG_DIR

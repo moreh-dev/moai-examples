@@ -90,8 +90,7 @@ def main(args):
                         )
                         ])
     trainer.train()
-    trainer.save_model(args.save_path)
-    # save_model_and_tokenizer(args, unwrapped_model, tokenizer)
+    save_model_and_tokenizer(args, model, tokenizer)
 
 
 if __name__ == "__main__":
