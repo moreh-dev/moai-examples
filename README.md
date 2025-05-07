@@ -84,7 +84,7 @@ pip install -r requirments.txt
 bash scripts/train_{model}.sh
 ```
 
-> For training `qwen_14b`, `qwen_72b`, additional environment setup is required using the following command:
+> For training `qwen2_72b`, additional environment setup is required using the following command:
 >
 > ```bash
 > pip install -r requirements/requirements_qwen.txt
@@ -196,6 +196,14 @@ finetuning_codes
 
 
 
+### `inference_codes`
+
+ `inference_codes` directory contains guide for model inference. 
+
+```bash
+inference_codes
+└── README.md           # Guide for model inference using MoAI Platform 
+```
 
 ## Learn More
 

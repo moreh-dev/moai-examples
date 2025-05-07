@@ -6,76 +6,81 @@ Please contact the owner of the MoAI platform you wish to use for instructions o
 
 ## Supported Models
 
+
+
 <div align="center" style="margin-top: 1rem;">
 <table>
   <thead>
     <tr>
-      <th rowspan="2">Supported Models</th>
-      <th rowspan="2">Model Max Length</th>
+      <th rowspan="2" style="text-align: center;">Supported Models</th>
+      <th rowspan="2" style="text-align: center;">Model Max Length</th>
       <th colspan="2" style="text-align: center;">TP Size</th>
     </tr>
     <tr>
-      <th>MI250</th>
-      <th>MI308x</th>
+      <th style="text-align: center;">MI250</th>
+      <th style="text-align: center;">MI308x</th>
     </tr>
   </thead>
   <tbody>
     <tr>
-      <td><a href="https://huggingface.co/huggyllama/llama-30b">huggyllama/llama-30b</a></td>
-      <td>2048</td>
-      <td>1</td>
-      <td>1</td>
+      <td style="text-align: center;"><a href="https://huggingface.co/huggyllama/llama-30b">huggyllama/llama-30b</a></td>
+      <td style="text-align: center;">2048</td>
+      <td style="text-align: center;">1</td>
+      <td style="text-align: center;">1</td>
     </tr>
     <tr>
-      <td><a href="https://huggingface.co/meta-llama/Llama-2-7b-chat-hf">meta-llama/Llama-2-7b-chat-hf</a></td>
-      <td>4096</td>
-      <td>1</td>
-      <td>1</td>
+      <td style="text-align: center;"><a href="https://huggingface.co/meta-llama/Llama-2-7b-chat-hf">meta-llama/Llama-2-7b-chat-hf</a></td>
+      <td style="text-align: center;">4096</td>
+      <td style="text-align: center;">1</td>
+      <td style="text-align: center;">1</td>
     </tr>
     <tr>
-      <td><a href="https://huggingface.co/meta-llama/Llama-2-13b-chat-hf">meta-llama/Llama-2-13b-chat-hf</a></td>
-      <td>4096</td>
-      <td>1</td>
-      <td>1</td>
+      <td style="text-align: center;"><a href="https://huggingface.co/meta-llama/Llama-2-13b-chat-hf">meta-llama/Llama-2-13b-chat-hf</a></td>
+      <td style="text-align: center;">4096</td>
+      <td style="text-align: center;">1</td>
+      <td style="text-align: center;">1</td>
     </tr>
     <tr>
-      <td><a href="https://huggingface.co/meta-llama/Meta-Llama-2-70b-hf">meta-llama/Meta-Llama-2-70b-hf</a></td>
-      <td>4096</td>
-      <td>4</td>
-      <td>2</td>
+      <td style="text-align: center;"><a href="https://huggingface.co/meta-llama/Meta-Llama-2-70b-hf">meta-llama/Meta-Llama-2-70b-hf</a></td>
+      <td style="text-align: center;">4096</td>
+      <td style="text-align: center;">4</td>
+      <td style="text-align: center;">2</td>
     </tr>
     <tr>
-      <td><a href="https://huggingface.co/meta-llama/Meta-Llama-3-8B-Instruct">meta-llama/Meta-Llama-3-8B-Instruct</a></td>
-      <td>8192</td>
-      <td>1</td>
-      <td>1</td>
+      <td style="text-align: center;"><a href="https://huggingface.co/meta-llama/Meta-Llama-3-8B-Instruct">meta-llama/Meta-Llama-3-8B-Instruct</a></td>
+      <td style="text-align: center;">8192</td>
+      <td style="text-align: center;">1</td>
+      <td style="text-align: center;">1</td>
     </tr>
     <tr>
-      <td><a href="https://huggingface.co/meta-llama/Meta-Llama-3-70B-Instuct">meta-llama/Meta-Llama-3-70B-Instuct</a></td>
-      <td>8192</td>
-      <td>4</td>
-      <td>2</td>
+      <td style="text-align: center;"><a href="https://huggingface.co/meta-llama/Meta-Llama-3-70B-Instuct">meta-llama/Meta-Llama-3-70B-Instuct</a></td>
+      <td style="text-align: center;">8192</td>
+      <td style="text-align: center;">4</td>
+      <td style="text-align: center;">2</td>
     </tr>
     <tr>
-      <td><a href="https://huggingface.co/Qwen/Qwen2-72B-Instruct">Qwen/Qwen2-72B-Instruct</a></td>
-      <td>32768</td>
-      <td>4</td>
-      <td>2</td>
+      <td style="text-align: center;"><a href="https://huggingface.co/Qwen/Qwen2-72B-Instruct">Qwen/Qwen2-72B-Instruct</a></td>
+      <td style="text-align: center;">32768</td>
+      <td style="text-align: center;">4</td>
+      <td style="text-align: center;">2</td>
     </tr>
     <tr>
-      <td><a href="https://huggingface.co/Qwen/QwQ-32B">Qwen/QwQ-32B</a></td>
-      <td>40960</td>
-      <td>4</td>
-      <td>2</td>
+      <td style="text-align: center;"><a href="https://huggingface.co/Qwen/QwQ-32B">Qwen/QwQ-32B</a></td>
+      <td style="text-align: center;">40960</td>
+      <td style="text-align: center;">4</td>
+      <td style="text-align: center;">2</td>
     </tr>
     <tr>
-      <td><a href="https://huggingface.co/deepseek-ai/DeepSeek-R1">deepseek-ai/DeepSeek-R1</a></td>
-      <td>163840</td>
-      <td>-</td>
-      <td>8</td>
+      <td style="text-align: center;"><a href="https://huggingface.co/deepseek-ai/DeepSeek-R1">deepseek-ai/DeepSeek-R1</a></td>
+      <td style="text-align: center;">163840</td>
+      <td style="text-align: center;">-</td>
+      <td style="text-align: center;">8</td>
     </tr>
   </tbody>
 </table>
+</div>
+
+
 
 
 
