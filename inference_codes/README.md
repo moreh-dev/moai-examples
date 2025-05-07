@@ -155,22 +155,3 @@ Note that the exact response content may vary depending on the model and its con
   "prompt_logprobs":null
 }
 ```
-
-Request formats for specific models are described separately below:
-
-- `Qwen/Qwen2-72B-Instruct`, `Qwen/QwQ-32B`: Initial versions of Qwen models require `top_k` to be included in the request.
-
-```bash
-curl $ENDPOINT_URL/v1/chat/completions -H "Content-Type: application/json"   -d '{
-    "model": "/model/Qwen2-72B-Instruct",
-    "messages": [
-        {"role": "system", "content": "You are a helpful assistant."},
-        {"role": "user", "content": "Who won the world series in 2020?"}
-    ],
-    "max_tokens": 200,
-    "top_k": 1
-}'
-```
-
-
-
