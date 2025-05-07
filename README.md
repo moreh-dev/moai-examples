@@ -70,7 +70,7 @@ ap-smi
 
 +-----------------------------------------------------------------------------+
 |                                     Accelerator platform Version : v0.0.30  |
-|               MoAI Framework Version : 25.3.208 Latest Version : 25.3.208   |
+|              MoAI Framework Version : 25.4.3005 Latest Version : 25.4.3005  |
 +---------+---------+------------------------+----------------+---------------+
 |      #  |  NAME   |  FLAVOR                |  MEM USAGE(%)  |  GPU UTIL(%)  |
 +---------+---------+------------------------+----------------+---------------+
@@ -128,7 +128,7 @@ START_TIME=$(TZ="Asia/Seoul" date)
 CURR_TIME=$(date +"%y%m%d_%H%M%S")
 
 CONFIG_PATH=config.yaml
-MODEL=meta-llama/Meta-Llama-3-8B
+MODEL=/root/models/llama3_8b
 SAVE_DIR=../checkpoints/llama3_8b
 LOG_DIR=logs
 
@@ -202,11 +202,15 @@ finetuning_codes
 
 ### `inference_codes`
 
- `inference_codes` directory contains guide for model inference. 
+ `inference_codes` directory contains scripts for model inference. 
 
 ```bash
-inference_codes
-└── README.md           # Guide for model inference using MoAI Platform 
+finetuning_codes
+├── agent_client.py            # Python script for model loading
+├── benchmark_client.py        # Python script to evaluate inference performance 
+├── requirements.txt           # Requirements for inference 
+├── chat.py                    # Python script for human evaluation of loaded model
+└── client_utils.py            # Utility functions for chat.py/benchmark_client.py/agent_client.py
 ```
 
 

@@ -1,129 +1,150 @@
 # Inference 
-
 ## Prerequisite
-
-Please contact the owner of the MoAI platform you wish to use for instructions on how to create an endpoint.
-
+```
+pip install -r requirements.txt
+```
 ## Supported Models
 
 <div align="center" style="margin-top: 1rem;">
 
-
-| Supported Models                                             | Model Max Length | TP Size |
-| ------------------------------------------------------------ | ---------------: | :-----: |
-| [Qwen/Qwen-14B-Chat](https://huggingface.co/Qwen/Qwen-14B-Chat) |             2048 |    1    |
-| [Qwen/Qwen-72B-Chat](https://huggingface.co/Qwen/Qwen-72B-Chat) |             2048 |    4    |
-| [Qwen/Qwen2-72B-Instruct](https://huggingface.co/Qwen/Qwen2-72B-Instruct) |            32768 |    4    |
-| [Qwen/Qwen2.5-32B-Instruct-GPTQ-Int8](https://huggingface.co/Qwen/Qwen2.5-32B-Instruct-GPTQ-Int8) |            32768 |    1    |
-| [baichuan-inc/Baichuan-13B-Chat](https://huggingface.co/baichuan-inc/Baichuan-13B-Chat) |             4096 |    1    |
-| [baichuan-inc/Baichuan2-13B-Chat](https://huggingface.co/baichuan-inc/Baichuan2-13B-Chat) |             4096 |    1    |
-| [meta-llama/Meta-Llama-3-8B-Instruct](https://huggingface.co/meta-llama/Meta-Llama-3-8B-Instruct) |             8192 |    1    |
-| [meta-llama/Meta-Llama-3-70B-Instruct](https://huggingface.co/meta-llama/Meta-Llama-3-70B-Instruct) |             8192 |    4    |
-| [internlm/internlm2_5-20b-chat](https://huggingface.co/internlm/internlm2_5-20b-chat) |            32768 |    1    |
-| [google/gemma-2-27b-it](https://huggingface.co/google/gemma-2-27b-it) |             4096 |    2    |
-| [THUDM/chatglm3-6b](https://huggingface.co/THUDM/chatglm3-6b) |             8192 |    1    |
-| [THUDM/chatglm3-6b-32k](https://huggingface.co/THUDM/chatglm3-6b-32k) |            32768 |    1    |
-| [mistralai/Mistral-7B-Instruct-v0.3](https://huggingface.co/mistralai/Mistral-7B-Instruct-v0.3) |            32768 |    1    |
+| Supported Models                      |
+|-------------------------------------|
+| [Qwen/Qwen-14B](https://huggingface.co/Qwen/Qwen-14B)                          |
+| [Qwen/Qwen-72B](https://huggingface.co/Qwen/Qwen-72B)                       |
+| [Qwen/Qwen2-72B-Instruct](https://huggingface.co/Qwen/Qwen2-72B-Instruct)               |
+| [baichuan-inc/Baichuan-13B-Chat](https://huggingface.co/baichuan-inc/Baichuan-13B-Chat)      |
+| [internlm/internlm2_5-20b-chat](https://huggingface.co/internlm/internlm2_5-20b-chat)      |
+| [meta-llama/Meta-Llama-3-8B](https://huggingface.co/meta-llama/Meta-Llama-3-8B)          |
+| [google/gemma-2-27b-it](https://huggingface.co/google/gemma-2-27b-it)               |
+| [THUDM/chatglm3-6b-32k](https://huggingface.co/THUDM/chatglm3-6b-32k)               |
+| [Qwen/Qwen2.5-32B-Instruct-GPTQ-Int8](https://huggingface.co/Qwen/Qwen2.5-32B-Instruct-GPTQ-Int8) |
+| [THUDM/chatglm3-6b](https://huggingface.co/THUDM/chatglm3-6b) |
+| [mistralai/Mistral-7B-v0.3](https://huggingface.co/mistralai/Mistral-7B-v0.3) | 
 
 </div>
 
 
-## Endpoint Command
+## Model Load 
 
-The following is the command to create an endpoint. Most models use the same command, but some models may require additional settings.  
-The command includes several environment variables:
+Below is the code for loading the model onto the inference server. When you run the code, you first choose which of the two model architectures to use.
+```bash
+(moreh) root@container:~/poc/inference_codes# python agent_client.py 
 
-- `$MODEL`: the name or path of the model
-- `$MODEL_MAX_LEN`: the maximum context length supported by the model
-- `$TP_SIZE`: tensor parallel size, must match the number of GPUs used
-
-Please note each models may require different values for these variables. Be sure to adjust them accordingly depending on the model you are using.
-
-```
-python -m vllm.entrypoints.openai.api_server --model $MODEL --max-model-len $MODEL_MAX_LEN --trust-remote-code --tensor-parallel-size $TP_SIZE --gpu-memory-utilization 0.95 --quantization None --block-size 16 --max-num-batched-tokens $MODEL_MAX_LEN --enable-chunked-prefill False
-```
+┌─ Current Server Info. ─┐
+│ Model :                │
+│ LoRA : False           │
+│ Checkpoint :           │
+│ Server Status : Idle   │
+└────────────────────────┘
 
 
-Commands for these specific models are described separately below:  
+========== Supported Model List ==========
+ 1. Qwen-14B
+==========================================
 
-- `baichuan-inc/Baichuan-13B-Chat`, `baichuan-inc/Baichuan2-13B-Chat` : Baichuan models require a separate chat template when deployed.
-
-```
-python -m vllm.entrypoints.openai.api_server --model $MODEL --max-model-len $MODEL_MAX_LEN --trust-remote-code --tensor-parallel-size $TP_SIZE --gpu-memory-utilization 0.95 --quantization None --block-size 16 --max-num-batched-tokens $MODEL_MAX_LEN --enable-chunked-prefill False --chat-template /app/vllm/examples/template_baichuan.jinja
+Select Model Number [1-1/q/Q] : 1
+Selected Model : Qwen-14B
 ```
 
-## Request Command
+You can select the option by entering a number(ex. {MODEL_NUMBER}). To stop the process, you may simply enter q or Q.
 
-The following is an example of a request command using `curl`. This format is compatible with the OpenAI Chat Completions API.
+```bash
+Select Model Number [1-1/q/Q] : 1
+Selected Model : Qwen-14B
 
-```
-curl $ENDPOINT_URL/v1/chat/completions -H "Content-Type: application/json" -d '{
-    "model": "$MODEL",
-    "messages": [
-        {"role": "system", "content": "You are a helpful assistant."},
-        {"role": "user", "content": "Who won the world series in 2020?"}
-    ],
-    "max_tokens": 200
-}'
-```
 
-If the request is sent correctly, you should receive a response similar to the one below.  
-Note that the exact response content may vary depending on the model and its configuration.
+========== Select Checkpoints ============
+ 1. Use Pretrained Model (default model)
+ 2. Use Your Checkpoint
+==========================================
 
-```
-{
-  "id":"chatcmpl-abc123",
-  "object":"chat.completion",
-  "created":1744950029,
-  "model":"$MODEL",
-  "choices":[
-    {
-      "index":0,
-      "message":{
-        "role":"assistant",
-        "reasoning_content":null,
-        "content":" The winning team of the 2020 World Series was the Los Angeles Dodgers. They beat the Tampa Bay Rays in the seven-game series, which was held in stringent COVID-19 protocols to ensure the safety of players, staff, and fans.",
-        "tool_calls":[]
-      },
-      "logprobs":null,
-      "finish_reason":"stop",
-      "stop_reason":null
-    }
-  ],
-  "usage":{
-    "prompt_tokens":35,
-    "total_tokens":91,
-    "completion_tokens":56,
-    "prompt_tokens_details":null
-  },
-  "prompt_logprobs":null
-}
+Select Option [1-2/q/Q] : 
 ```
 
-Request formats for specific models are described separately below:
+If the model is selected correctly, the next step is to choose whether to use the pretrained model checkpoint or the fine-tuned model checkpoint. If you have a fine-tuned model, select option 2. If not, choose option 1 to use the checkpoint of the pre-trained model.
 
- - `google/gemma2-27b-it` : Gemma does not support a “system” role in the chat template. Including it may raise the `jinja2.exceptions.TemplateError: System role not supported` error. Make sure to remove the system message from your request as below
+### Using Pretrained model checkpoint
 
+If you select option 1, it automatically loads selected pre-trained model checkpoint on your inference server.
+
+```bash
+Select Option [1-2/q/Q] : 1
+
+Request has been sent.
+ Loading .....
+Inference server has been successfully LOADED
 ```
-...
-"model": "google/gemma-2-27b-it",
-    "messages": [
-        {"role": "user", "content": "Who won the world series in 2020?"}
-    ],
-    "max_tokens": 200
-...
+
+
+### Using Fine-tuned model checkpoint
+
+If you select option 2, you will be asked to put the path of your fine-tuned model checkpoint.
+
+```bash
+Select Option [1-2/q/Q] : 2
+
+Checkpoint path : /root/poc/checkpoints/
+```
+For example, if your fine-tuned checkpoint is saved in `/root/poc/checkpoint/qwen_finetuned`, give the checkpoint path as follows then press enter to load your fine-tuned checkpoint model.
+
+```bash
+Checkpoint path : /root/poc/checkpoints/qwen_finetuned
+Request has been sent.
+ Loading .....
+Inference server has been successfully LOADED
 ```
 
-- `Qwen/Qwen-14B-Chat`, `Qwen/Qwen-72B-Chat`: Initial versions of Qwen models require `top_k` to be included in the request.
+## Human Evaluation by chatting
 
+Once the model has been successfully loaded, you can start a chat by running the client code. Execute the following script to initiate a conversation with the loaded model. This script connects the client interface to the model, allowing you to interact with it through text inputs and receive responses in real time.
+
+
+```bash
+(moreh) root@container:~/poc/inference_codes# python chat.py
+[INFO] Type 'quit' to exit
+Prompt : Hi
+================================================================================
+Assistant : 
+Hello! How can I assist you today?
 ```
-curl $ENDPOINT_URL/v1/chat/completions -H "Content-Type: application/json"   -d '{
-    "model": "/model/Qwen-14B-Chat",
-    "messages": [
-        {"role": "system", "content": "You are a helpful assistant."},
-        {"role": "user", "content": "Who won the world series in 2020?"}
-    ],
-    "max_tokens": 200,
-    "top_k": 1
-}'
+
+## Measuring the Inference Performance
+
+If you want to measure the inference performance , you can use `benchmark_client.py` as following: 
+
+```bash
+python benchmark_client.py \
+--input-len {input_len} \ # Length of the input tokens 
+--output-len {output_len} \ # Length of the output tokens
+--num-prompts {num_conc_req} \ # Number of requests that run concurrently in a single trial
+--num-trial {num_run} \ # Number of trials 
+--save-result \ # Whether to save result in .json file 
+--result-dir benchmark_result # Path where result file saved 
+```
+
+When the script is executed, the results are out as a log as shown below.
+
+```bash
+warmup
+0th Experiments
+100%|_________________________________________________________| 1/1 [01:11<00:00,  11.11s/it]
+1th Experiments
+100%|_________________________________________________________| 1/1 [01:11<00:00,  11.11s/it]
+2th Experiments
+100%|_________________________________________________________| 1/1 [01:11<00:00,  11.11s/it]
+============ Serving Benchmark Result ============
+Successful requests:                     11         
+Benchmark duration (s):                  11.11      
+Single input token length:               111     
+Single output token length:              111       
+Total input tokens:                      111       
+Total generated tokens:                  111       
+Max. generation throughput (tok/s):      11.11     
+Max. generation throughput/GPU (tok/s):  11.11     
+Max. running requests:                   1      
+---------------Time to First Token----------------
+Mean TTFT (ms):                          11.11     
+Median TTFT (ms):                        11.11     
+P99 TTFT (ms):                           11.11     
+==================================================
 ```

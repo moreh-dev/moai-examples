@@ -4,14 +4,14 @@ START_TIME=$(TZ="Asia/Seoul" date)
 CURR_TIME=$(date +"%y%m%d_%H%M%S")
 
 CONFIG_PATH=config.yaml
-#MODEL=Qwen/Qwen2-72B-Instruct
-MODEL=/root/models/Qwen2-72B-Instruct
-SAVE_DIR=../checkpoints/Qwen2-72B-Instruct
+#MODEL=meta-llama/Llama-2-7b-chat-hf
+MODEL=/root/models/Llama-2-7b-chat-hf
+SAVE_DIR=../checkpoints/llama2-7b-instruct
 LOG_DIR=logs
 
 mkdir -p $SAVE_DIR $LOG_DIR
 
-export ACCELERATOR_PLATFORM_FLAVOR=flavor-default-32
+export ACCELERATOR_PLATFORM_FLAVOR=flavor-default-8
 export TOKENIZERS_PARALLELISM=false
 export TRANSFORMERS_VERBOSITY=info
 
@@ -21,7 +21,7 @@ accelerate launch \
     --model $MODEL \
     --dataset bitext/Bitext-customer-support-llm-chatbot-training-dataset \
     --lr 0.00001 \
-    --train-batch-size 32 \
+    --train-batch-size 64 \
     --eval-batch-size 32 \
     --block-size 1024 \
     --num-epochs 5 \

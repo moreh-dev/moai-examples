@@ -166,9 +166,11 @@ def load_custom_dataset(args):
     if args.dataset_name_or_path == "bitext/Bitext-customer-support-llm-chatbot-training-dataset":
         dataset = {}
         dataset["train"] = load_dataset(
-            args.dataset_name_or_path, split="train[5%:]").with_format("torch")
+            # args.dataset_name_or_path, split="train[5%:]").with_format("torch")
+            args.dataset_name_or_path, split="train[:1000]").with_format("torch")
         dataset["validation"] = load_dataset(
-            args.dataset_name_or_path, split="train[:5%]").with_format("torch")
+            # args.dataset_name_or_path, split="train[:5%]").with_format("torch")
+            args.dataset_name_or_path, split="train[1000:1100]").with_format("torch")
     elif args.dataset_name_or_path == "agileloop/izaz-sequence-of-actions-prediction-dataset-llama2-7b-32k":
         dataset = load_dataset(args.dataset_name_or_path).with_format("torch")
         dataset["train"] = load_dataset(
@@ -576,6 +578,13 @@ class TrainCallback(TrainerCallback):
             eval_duration = self.eval_ed - self.eval_st
         else:
             eval_duration = 0
+        if len(self.tps) == 0:
+            duration = time.time() - self.start
+            tps = (self.block_size * self.batch_size * self.accum) / duration
+            self.tps.append(tps)
+            self.elapsed_times.append(duration)
+        self.accum = 0
+        self.start = time.time()
         avg_tps = sum(self.tps) / len(self.tps)
         avg_time_per_1_step = sum(self.elapsed_times) / (
             len(self.elapsed_times) * args.logging_steps - 1)
