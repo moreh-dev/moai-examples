@@ -90,7 +90,6 @@ def main(args):
                         )
                         ])
     trainer.train()
-    # trainer.save_model(args.save_path)
     save_model_and_tokenizer(args, model, tokenizer)
 
 
