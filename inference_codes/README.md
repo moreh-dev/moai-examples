@@ -96,7 +96,7 @@ The command includes several environment variables:
 Please note each models may require different values for these variables. Be sure to adjust them accordingly depending on the model you are using.
 
 ```bash
-python -m vllm.entrypoints.openai.api_server --model $MODEL --max-model-len $MODEL_MAX_LEN --trust-remote-code --tensor-parallel-size $TP_SIZE --gpu-memory-utilization 0.95 --quantization None --block-size 16 --max-num-batched-tokens $MODEL_MAX_LEN --enable-chunked-prefill False
+vllm serve $MODEL --max-model-len $MODEL_MAX_LEN --trust-remote-code --tensor-parallel-size $TP_SIZE --gpu-memory-utilization 0.95 --quantization None --block-size 16 --max-num-batched-tokens $MODEL_MAX_LEN --enable-chunked-prefill False
 ```
 
 
@@ -105,7 +105,7 @@ Commands for these specific models are described separately below:
 - `deepseek-ai/DeepSeek-R1` : Some arguments are unnecessary for DeepSeek.
 
 ```bash
-python -m vllm.entrypoints.openai.api_server --model deepseek-ai/DeepSeek-R1 --max-model-len 163840 --trust-remote-code --tensor-parallel-size 8 --gpu-memory-utilization 0.95 --quantization None
+vllm serve deepseek-ai/DeepSeek-R1 --max-model-len 163840 --trust-remote-code --tensor-parallel-size 8 --gpu-memory-utilization 0.95 --quantization None
 ```
 
 ## Request Command
