@@ -36,7 +36,7 @@ The optimized versions of MAF, Torch, and Flavor for each model are as follows:
 
 |                            Model                             | MAF Version | Torch Version | Python Version |       Flavor        | Train Batch | Eval Batch |
 | :----------------------------------------------------------: | :---------: | :-----------: | -------------- | :-----------------: | :---------: | :--------: |
-| [hugglyllama/llama-30](https://huggingface.co/huggyllama/llama-30b) | `25.4.3016` |    `2.1.0`    | `3.10`         | `flavor-default-16` |     32      |     16     |
+| [hugglyllama/llama-30b](https://huggingface.co/huggyllama/llama-30b) | `25.4.3016` |    `2.1.0`    | `3.10`         | `flavor-default-16` |     32      |     16     |
 | [meta-llama/Llama-2-7b-chat-hf](https://huggingface.co/meta-llama/Llama-2-7b-chat-hf) | `25.4.3016` |    `2.1.0`    | `3.10`         | `flavor-default-8`  |     64      |     32     |
 | [meta-llama/Llama-2-13b-chat-hf](https://huggingface.co/meta-llama/Llama-2-13b-chat-hf) | `25.4.3016` |    `2.1.0`    | `3.10`         | `flavor-default-8`  |     32      |     8      |
 | [meta-llama/Meta-Llama-2-70b-hf](https://huggingface.co/meta-llama/Llama-2-70b-hf) | `25.4.3016` |    `2.1.0`    | `3.10`         | `flavor-default-32` |     256     |     64     |
@@ -99,7 +99,7 @@ By specifying one of the models listed under **example model names** in `{model}
 
 | **List of Example Models**                                   | Name in `{model}` |
 | :----------------------------------------------------------- | :---------------- |
-| [hugglyllama/llama-30](https://huggingface.co/huggyllama/llama-30b) | `llama_30b`       |
+| [hugglyllama/llama-30b](https://huggingface.co/huggyllama/llama-30b) | `llama_30b`       |
 | [meta-llama/Llama-2-7b-chat-hf](https://huggingface.co/meta-llama/Llama-2-7b-chat-hf) | `llama2_7b`       |
 | [meta-llama/Llama-2-13b-chat-hf](https://huggingface.co/meta-llama/Llama-2-13b-chat-hf) | `llama2_13b`      |
 | [meta-llama/Meta-Llama-2-70b-hf](https://huggingface.co/meta-llama/Llama-2-70b-hf) | `llama2_70b`      |

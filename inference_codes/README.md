@@ -1,150 +1,171 @@
 # Inference 
+
 ## Prerequisite
-```
-pip install -r requirements.txt
-```
+
+Please contact the owner of the MoAI platform you wish to use for instructions on how to create an endpoint.
+
 ## Supported Models
 
 <div align="center" style="margin-top: 1rem;">
+<table>
+  <thead>
+    <tr>
+      <th rowspan="2">Supported Models</th>
+      <th rowspan="2">Model Max Length</th>
+      <th colspan="2" style="text-align: center;">TP Size</th>
+    </tr>
+    <tr>
+      <th>MI250</th>
+      <th>MI308x</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><a href="https://huggingface.co/huggyllama/llama-30b">huggyllama/llama-30b</a></td>
+      <td>2048</td>
+      <td>1</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <td><a href="https://huggingface.co/meta-llama/Llama-2-7b-chat-hf">meta-llama/Llama-2-7b-chat-hf</a></td>
+      <td>4096</td>
+      <td>1</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <td><a href="https://huggingface.co/meta-llama/Llama-2-13b-chat-hf">meta-llama/Llama-2-13b-chat-hf</a></td>
+      <td>4096</td>
+      <td>1</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <td><a href="https://huggingface.co/meta-llama/Meta-Llama-2-70b-hf">meta-llama/Meta-Llama-2-70b-hf</a></td>
+      <td>4096</td>
+      <td>4</td>
+      <td>2</td>
+    </tr>
+    <tr>
+      <td><a href="https://huggingface.co/meta-llama/Meta-Llama-3-8B-Instruct">meta-llama/Meta-Llama-3-8B-Instruct</a></td>
+      <td>8192</td>
+      <td>1</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <td><a href="https://huggingface.co/meta-llama/Meta-Llama-3-70B-Instuct">meta-llama/Meta-Llama-3-70B-Instuct</a></td>
+      <td>8192</td>
+      <td>4</td>
+      <td>2</td>
+    </tr>
+    <tr>
+      <td><a href="https://huggingface.co/Qwen/Qwen2-72B-Instruct">Qwen/Qwen2-72B-Instruct</a></td>
+      <td>32768</td>
+      <td>4</td>
+      <td>2</td>
+    </tr>
+    <tr>
+      <td><a href="https://huggingface.co/Qwen/QwQ-32B">Qwen/QwQ-32B</a></td>
+      <td>40960</td>
+      <td>4</td>
+      <td>2</td>
+    </tr>
+    <tr>
+      <td><a href="https://huggingface.co/deepseek-ai/DeepSeek-R1">deepseek-ai/DeepSeek-R1</a></td>
+      <td>163840</td>
+      <td>-</td>
+      <td>8</td>
+    </tr>
+  </tbody>
+</table>
 
-| Supported Models                      |
-|-------------------------------------|
-| [Qwen/Qwen-14B](https://huggingface.co/Qwen/Qwen-14B)                          |
-| [Qwen/Qwen-72B](https://huggingface.co/Qwen/Qwen-72B)                       |
-| [Qwen/Qwen2-72B-Instruct](https://huggingface.co/Qwen/Qwen2-72B-Instruct)               |
-| [baichuan-inc/Baichuan-13B-Chat](https://huggingface.co/baichuan-inc/Baichuan-13B-Chat)      |
-| [internlm/internlm2_5-20b-chat](https://huggingface.co/internlm/internlm2_5-20b-chat)      |
-| [meta-llama/Meta-Llama-3-8B](https://huggingface.co/meta-llama/Meta-Llama-3-8B)          |
-| [google/gemma-2-27b-it](https://huggingface.co/google/gemma-2-27b-it)               |
-| [THUDM/chatglm3-6b-32k](https://huggingface.co/THUDM/chatglm3-6b-32k)               |
-| [Qwen/Qwen2.5-32B-Instruct-GPTQ-Int8](https://huggingface.co/Qwen/Qwen2.5-32B-Instruct-GPTQ-Int8) |
-| [THUDM/chatglm3-6b](https://huggingface.co/THUDM/chatglm3-6b) |
-| [mistralai/Mistral-7B-v0.3](https://huggingface.co/mistralai/Mistral-7B-v0.3) | 
-
-</div>
 
 
-## Model Load 
+## Endpoint Command
 
-Below is the code for loading the model onto the inference server. When you run the code, you first choose which of the two model architectures to use.
-```bash
-(moreh) root@container:~/poc/inference_codes# python agent_client.py 
+The following is the command to create an endpoint. Most models use the same command, but some models may require additional settings.  
+The command includes several environment variables:
 
-┌─ Current Server Info. ─┐
-│ Model :                │
-│ LoRA : False           │
-│ Checkpoint :           │
-│ Server Status : Idle   │
-└────────────────────────┘
+- `$MODEL`: the name or path of the model
+- `$MODEL_MAX_LEN`: the maximum context length supported by the model
+- `$TP_SIZE`: tensor parallel size, must match the number of GPUs used
 
-
-========== Supported Model List ==========
- 1. Qwen-14B
-==========================================
-
-Select Model Number [1-1/q/Q] : 1
-Selected Model : Qwen-14B
-```
-
-You can select the option by entering a number(ex. {MODEL_NUMBER}). To stop the process, you may simply enter q or Q.
-
-```bash
-Select Model Number [1-1/q/Q] : 1
-Selected Model : Qwen-14B
-
-
-========== Select Checkpoints ============
- 1. Use Pretrained Model (default model)
- 2. Use Your Checkpoint
-==========================================
-
-Select Option [1-2/q/Q] : 
-```
-
-If the model is selected correctly, the next step is to choose whether to use the pretrained model checkpoint or the fine-tuned model checkpoint. If you have a fine-tuned model, select option 2. If not, choose option 1 to use the checkpoint of the pre-trained model.
-
-### Using Pretrained model checkpoint
-
-If you select option 1, it automatically loads selected pre-trained model checkpoint on your inference server.
-
-```bash
-Select Option [1-2/q/Q] : 1
-
-Request has been sent.
- Loading .....
-Inference server has been successfully LOADED
-```
-
-
-### Using Fine-tuned model checkpoint
-
-If you select option 2, you will be asked to put the path of your fine-tuned model checkpoint.
-
-```bash
-Select Option [1-2/q/Q] : 2
-
-Checkpoint path : /root/poc/checkpoints/
-```
-For example, if your fine-tuned checkpoint is saved in `/root/poc/checkpoint/qwen_finetuned`, give the checkpoint path as follows then press enter to load your fine-tuned checkpoint model.
-
-```bash
-Checkpoint path : /root/poc/checkpoints/qwen_finetuned
-Request has been sent.
- Loading .....
-Inference server has been successfully LOADED
-```
-
-## Human Evaluation by chatting
-
-Once the model has been successfully loaded, you can start a chat by running the client code. Execute the following script to initiate a conversation with the loaded model. This script connects the client interface to the model, allowing you to interact with it through text inputs and receive responses in real time.
-
+Please note each models may require different values for these variables. Be sure to adjust them accordingly depending on the model you are using.
 
 ```bash
-(moreh) root@container:~/poc/inference_codes# python chat.py
-[INFO] Type 'quit' to exit
-Prompt : Hi
-================================================================================
-Assistant : 
-Hello! How can I assist you today?
+python -m vllm.entrypoints.openai.api_server --model $MODEL --max-model-len $MODEL_MAX_LEN --trust-remote-code --tensor-parallel-size $TP_SIZE --gpu-memory-utilization 0.95 --quantization None --block-size 16 --max-num-batched-tokens $MODEL_MAX_LEN --enable-chunked-prefill False
 ```
 
-## Measuring the Inference Performance
 
-If you want to measure the inference performance , you can use `benchmark_client.py` as following: 
+Commands for these specific models are described separately below:  
+
+- `deepseek-ai/DeepSeek-R1` : Some arguments are unnecessary for DeepSeek.
 
 ```bash
-python benchmark_client.py \
---input-len {input_len} \ # Length of the input tokens 
---output-len {output_len} \ # Length of the output tokens
---num-prompts {num_conc_req} \ # Number of requests that run concurrently in a single trial
---num-trial {num_run} \ # Number of trials 
---save-result \ # Whether to save result in .json file 
---result-dir benchmark_result # Path where result file saved 
+python -m vllm.entrypoints.openai.api_server --model deepseek-ai/DeepSeek-R1 --max-model-len 163840 --trust-remote-code --tensor-parallel-size 8 --gpu-memory-utilization 0.95 --quantization None
 ```
 
-When the script is executed, the results are out as a log as shown below.
+## Request Command
+
+The following is an example of a request command using `curl`. This format is compatible with the OpenAI Chat Completions API.
 
 ```bash
-warmup
-0th Experiments
-100%|_________________________________________________________| 1/1 [01:11<00:00,  11.11s/it]
-1th Experiments
-100%|_________________________________________________________| 1/1 [01:11<00:00,  11.11s/it]
-2th Experiments
-100%|_________________________________________________________| 1/1 [01:11<00:00,  11.11s/it]
-============ Serving Benchmark Result ============
-Successful requests:                     11         
-Benchmark duration (s):                  11.11      
-Single input token length:               111     
-Single output token length:              111       
-Total input tokens:                      111       
-Total generated tokens:                  111       
-Max. generation throughput (tok/s):      11.11     
-Max. generation throughput/GPU (tok/s):  11.11     
-Max. running requests:                   1      
----------------Time to First Token----------------
-Mean TTFT (ms):                          11.11     
-Median TTFT (ms):                        11.11     
-P99 TTFT (ms):                           11.11     
-==================================================
+curl $ENDPOINT_URL/v1/chat/completions -H "Content-Type: application/json" -d '{
+    "model": "$MODEL",
+    "messages": [
+        {"role": "system", "content": "You are a helpful assistant."},
+        {"role": "user", "content": "Who won the world series in 2020?"}
+    ],
+    "max_tokens": 200
+}'
 ```
+
+If the request is sent correctly, you should receive a response similar to the one below.  
+Note that the exact response content may vary depending on the model and its configuration.
+
+```json
+{
+  "id":"chatcmpl-abc123",
+  "object":"chat.completion",
+  "created":1744950029,
+  "model":"$MODEL",
+  "choices":[
+    {
+      "index":0,
+      "message":{
+        "role":"assistant",
+        "reasoning_content":null,
+        "content":" The winning team of the 2020 World Series was the Los Angeles Dodgers. They beat the Tampa Bay Rays in the seven-game series, which was held in stringent COVID-19 protocols to ensure the safety of players, staff, and fans.",
+        "tool_calls":[]
+      },
+      "logprobs":null,
+      "finish_reason":"stop",
+      "stop_reason":null
+    }
+  ],
+  "usage":{
+    "prompt_tokens":35,
+    "total_tokens":91,
+    "completion_tokens":56,
+    "prompt_tokens_details":null
+  },
+  "prompt_logprobs":null
+}
+```
+
+Request formats for specific models are described separately below:
+
+- `Qwen/Qwen2-72B-Instruct`, `Qwen/QwQ-32B`: Initial versions of Qwen models require `top_k` to be included in the request.
+
+```bash
+curl $ENDPOINT_URL/v1/chat/completions -H "Content-Type: application/json"   -d '{
+    "model": "/model/Qwen2-72B-Instruct",
+    "messages": [
+        {"role": "system", "content": "You are a helpful assistant."},
+        {"role": "user", "content": "Who won the world series in 2020?"}
+    ],
+    "max_tokens": 200,
+    "top_k": 1
+}'
+```
+
+
+
