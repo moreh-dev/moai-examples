@@ -166,9 +166,11 @@ def load_custom_dataset(args):
     if args.dataset_name_or_path == "bitext/Bitext-customer-support-llm-chatbot-training-dataset":
         dataset = {}
         dataset["train"] = load_dataset(
-            args.dataset_name_or_path, split="train[5%:]").with_format("torch")
+            # args.dataset_name_or_path, split="train[5%:]").with_format("torch")
+            args.dataset_name_or_path, split="train[:1000]").with_format("torch")
         dataset["validation"] = load_dataset(
-            args.dataset_name_or_path, split="train[:5%]").with_format("torch")
+            # args.dataset_name_or_path, split="train[:5%]").with_format("torch")
+            args.dataset_name_or_path, split="train[:100]").with_format("torch")
     elif args.dataset_name_or_path == "agileloop/izaz-sequence-of-actions-prediction-dataset-llama2-7b-32k":
         dataset = load_dataset(args.dataset_name_or_path).with_format("torch")
         dataset["train"] = load_dataset(
