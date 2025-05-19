@@ -1,12 +1,10 @@
 transformers==4.50.3
 setuptools==69.5.1
-hydra-core
 peft==0.6.1
 Jinja2
 datasets
 loguru
 sentencepiece
-openai
 tenacity
 trl==0.16.0
 accelerate==1.6.0
