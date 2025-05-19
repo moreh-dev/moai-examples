@@ -319,8 +319,8 @@ moai-examples
 ├── checkpoints               # Directory to store model checkpoints during finetuning
 ├── finetuning_codes          # Code related to model fine-tuning
 ├── git-hooks                 # Git hooks directory for code formatting and other pre/post-commit tasks
-├── pyproject.toml						# Project metadata
-└── uv.lock         					# Lockfile that contains exact information about the proejct's dependencies
+├── pyproject.toml	      # Project metadata
+└── uv.lock         	      # Lockfile that contains exact information about the proejct's dependencies
 ```
 
 
@@ -332,7 +332,7 @@ moai-examples
 ```bash
 finetuning_codes
 ├── config.yaml                   # Config file for accelerate
-├── logs 													# Directory for training logs
+├── logs 	                  # Directory for training logs
 ├── scripts                       # Directory containing shell scripts for different fine-tuning setups
 ├── train.py                      # Main Python script for initiating the fine-tuning process
 └── utils.py                      # Utility functions for train.py
