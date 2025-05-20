@@ -14,22 +14,7 @@ export TOKENIZERS_PARALLELISM=false
 export TRANSFORMERS_VERBOSITY=info
 export ACCELERATOR_PLATFORM_FLAVOR=flavor-default-32
 
-# Detect uv virtual environment root, if available
-VENV_ROOT=$(
-  command -v uv >/dev/null 2>&1 \
-    && uv run python -c 'import sys, os; print(os.path.dirname(os.path.dirname(sys.executable)))' 2>/dev/null
-)
-
-# Select execution command based on uv availability
-if [ -n "$VENV_ROOT" ]; then
-  EXEC_CMD="uv run accelerate"
-  export LD_LIBRARY_PATH="${VENV_ROOT}/lib:${LD_LIBRARY_PATH}"
-else
-  EXEC_CMD="accelerate"
-fi
-
-# Launch training
-$EXEC_CMD launch \
+uv run accelerate launch \
   --config_file "$CONFIG_PATH" \
   train.py \
   --model "$MODEL" \
