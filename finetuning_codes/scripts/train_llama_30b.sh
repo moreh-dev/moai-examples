@@ -10,11 +10,11 @@ LOG_DIR=logs
 
 mkdir -p $SAVE_DIR $LOG_DIR
 
-export ACCELERATOR_PLATFORM_FLAVOR=flavor-default-16
 export TOKENIZERS_PARALLELISM=false
 export TRANSFORMERS_VERBOSITY=info
+export ACCELERATOR_PLATFORM_FLAVOR=flavor-default-16
 
-accelerate launch \
+uv run accelerate launch \
     --config_file $CONFIG_PATH \
     train.py \
     --model $MODEL \
