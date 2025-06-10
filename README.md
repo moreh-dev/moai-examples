@@ -320,3 +320,13 @@ finetuning_codes
 
 
 ---
+
+## 🔸 Running YOLO models on MoAI Platform 
+
+To train or run inference with [ultralytics](https://github.com/ultralytics/ultralytics) YOLO models on the MoAI Platform, which uses AMD accelerators, follow the steps below:
+```bash
+# Be sure to use the ROCm version of torch/torchvision 
+pip3 install torch torchvision  --index-url https://download.pytorch.org/whl/rocm6.3
+pip3 install ultralytics 
+```
+
